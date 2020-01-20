@@ -126,6 +126,7 @@ def main():
                 if args.load_resnet is not None:
                     print("\nLoading ResNet Model:")
                     resnet_model_fn = 'data/finetuned_resnet.h5'
+                    print(args.load_resnet)
                     gdown.download(args.load_resnet, resnet_model_fn, quiet=False)
                     ff_model = load_model(resnet_model_fn)
                     from keras.applications.resnet50 import preprocess_input
