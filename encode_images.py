@@ -7,6 +7,7 @@ import numpy as np
 import dnnlib
 import dnnlib.tflib as tflib
 import config
+import gdown
 from encoder.generator_model import Generator
 from encoder.perceptual_model import PerceptualModel, load_images
 from keras.models import load_model
@@ -36,7 +37,7 @@ def main():
     parser.add_argument('--iterations', default=100, help='Number of optimization steps for each batch', type=int)
     parser.add_argument('--decay_steps', default=10, help='Decay steps for learning rate decay (as a percent of iterations)', type=float)
     parser.add_argument('--load_effnet', default='data/finetuned_effnet.h5', help='Model to load for EfficientNet approximation of dlatents')
-    parser.add_argument('--load_resnet', default='data/finetuned_resnet.h5', help='Model to load for ResNet approximation of dlatents')
+    parser.add_argument('--load_resnet', default='https://drive.google.com/uc?id=1aT59NFy9-bNyXjDuZOTMl0qX0jmZc6Zb', help='Model to load for ResNet approximation of dlatents')
 
     # Loss function options
     parser.add_argument('--use_vgg_loss', default=0.4, help='Use VGG perceptual loss; 0 to disable, > 0 to scale.', type=float)
@@ -122,9 +123,11 @@ def main():
                     dlatents = np.vstack((dlatents,dl))
         else:
             if (ff_model is None):
-                if os.path.exists(args.load_resnet):
+                if args.load_resnet is not None:
                     print("Loading ResNet Model:")
-                    ff_model = load_model(args.load_resnet)
+                    resnet_model_fn = 'trained_models/finetuned_resnet.h5'
+                    gdown.download(args.load_resnet, resnet_model_fn, quiet=False)
+                    ff_model = load_model(resnet_model_fn)
                     from keras.applications.resnet50 import preprocess_input
             if (ff_model is None):
                 if os.path.exists(args.load_effnet):
