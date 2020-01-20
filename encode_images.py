@@ -20,6 +20,7 @@ def main():
     parser = argparse.ArgumentParser(description='Find latent representation of reference images using perceptual losses', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('src_dir', help='Directory with images for encoding')
     parser.add_argument('generated_images_dir', help='Directory for storing generated images')
+    parser.add_argument('guessed_images_dir', help='Directory for storing initially guessed images')
     parser.add_argument('dlatent_dir', help='Directory for storing dlatent representations')
     parser.add_argument('--data_dir', default='data', help='Directory for storing optional models')
     parser.add_argument('--mask_dir', default='masks', help='Directory for storing optional masks')
@@ -83,6 +84,7 @@ def main():
     os.makedirs(args.data_dir, exist_ok=True)
     os.makedirs(args.mask_dir, exist_ok=True)
     os.makedirs(args.generated_images_dir, exist_ok=True)
+    os.makedirs(args.guessed_images_dir, exist_ok=True)
     os.makedirs(args.dlatent_dir, exist_ok=True)
     os.makedirs(args.video_dir, exist_ok=True)
 
@@ -126,7 +128,6 @@ def main():
                 if args.load_resnet is not None:
                     print("\nLoading ResNet Model:")
                     resnet_model_fn = 'data/finetuned_resnet.h5'
-                    print(args.load_resnet)
                     gdown.download(args.load_resnet, resnet_model_fn, quiet=False)
                     ff_model = load_model(resnet_model_fn)
                     from keras.applications.resnet50 import preprocess_input
@@ -140,6 +141,14 @@ def main():
                 dlatents = ff_model.predict(preprocess_input(load_images(images_batch,image_size=args.resnet_image_size)))
         if dlatents is not None:
             generator.set_dlatents(dlatents)
+
+        # Generate images from initial dlatents and save them
+        initial_dlatents = generator.get_dlatents()
+        initial_images = generator.generate_images()
+        for img_array, dlatent, img_name in zip(initial_images, initial_dlatents, names):
+            img = PIL.Image.fromarray(img_array, 'RGB')
+            img.save(os.path.join(args.guessed_images_dir, f'{img_name}.png'), 'PNG')
+
         op = perceptual_model.optimize(generator.dlatent_variable, iterations=args.iterations)
         pbar = tqdm(op, leave=False, total=args.iterations)
         vid_count = 0
