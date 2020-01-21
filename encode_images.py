@@ -176,11 +176,11 @@ def main():
         generator.set_dlatents(best_dlatent)
         generated_images = generator.generate_images()
         generated_dlatents = generator.get_dlatents()
+        np.save(os.path.join(args.dlatent_dir, 'output_vectors.npy'), best_dlatent)
         for img_array, dlatent, img_name in zip(generated_images, generated_dlatents, names):
             img = PIL.Image.fromarray(img_array, 'RGB')
             img.save(os.path.join(args.generated_images_dir, f'{img_name}.png'), 'PNG')
             np.save(os.path.join(args.dlatent_dir, f'{img_name}.npy'), dlatent)
-
         generator.reset_dlatents()
 
 

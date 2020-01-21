@@ -50,3 +50,47 @@ def generate_faces_from_latent(generator, latent_vector):
                                               randomize_noise=False,
                                               **synthesis_kwargs)
 
+
+def perform_face_morphing(w_vectors, generator, original_imgs, reconstructed_imgs, res=1024, fs=40):
+
+    # Get aligned images and generated images
+    imgs1 = sorted([f for f in os.listdir(original_imgs) if '.png' in f])
+    imgs2 = sorted([f for f in os.listdir(reconstructed_imgs) if '.png' in f])
+
+    n_images = w_vectors.shape[0]
+    n_rows = n_images + 1
+    n_cols = n_images + 2
+
+    f, axes = plt.subplots(n_rows, n_cols, figsize=(fs, fs))
+    plt.subplots_adjust(wspace=0, hspace=0)
+    axes[0, 0].axis('off')
+    axes[0, 1].axis('off')
+
+    # Left Columns
+    for i in range(n_images):
+        img1 = Image.open(original_imgs + imgs1[i]).resize((res, res))
+        img2 = Image.open(reconstructed_imgs + imgs2[i]).resize((res, res))
+        axes[i + 1, 0].imshow(img1)
+        axes[i + 1, 0].axis('off')
+        axes[i + 1, 1].imshow(img2)
+        axes[i + 1, 1].axis('off')
+        if i == 0:
+            axes[i, 0].set_title('Original')
+            axes[i, 1].set_title('Reconstructed')
+
+    # Top Row
+    for j in range(n_images):
+        img = Image.open(reconstructed_imgs + imgs2[j]).resize((res, res))
+        axes[0, j + 2].imshow(img)
+        axes[0, j + 2].axis('off')
+
+    # Morphed Faces
+    for i in range(n_images):
+        for j in range(n_images):
+            if i == j:
+                axes[i + 1, j + 2].axis('off')
+            else:
+                avg_w = 0.5 * (w_vectors[i] + w_vectors[j]).reshape((1, 18, -1))
+                img = generate_faces_from_latent(generator, avg_w)[0]
+                axes[i + 1, j + 2].imshow(img)
+                axes[i + 1, j + 2].axis('off')
