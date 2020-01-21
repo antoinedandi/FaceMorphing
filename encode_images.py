@@ -8,13 +8,18 @@ import dnnlib
 import dnnlib.tflib as tflib
 import config
 import gdown
+from utils import split_to_batches
 from encoder.generator_model import Generator
 from encoder.perceptual_model import PerceptualModel, load_images
 from keras.models import load_model
 
-def split_to_batches(l, n):
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
+
+# Pretrained models URL
+url_styleGAN = 'https://drive.google.com/uc?export=download&id=1Ru1kpacSvmheTHP7evEGHEegXZjeTaoi'
+url_resnet = 'https://drive.google.com/uc?id=1aT59NFy9-bNyXjDuZOTMl0qX0jmZc6Zb'
+url_VGG_perceptual = 'https://drive.google.com/uc?export=download&id=1poMANPSNDHALZRuaqJGrl1EVOP1WNjLv'
+
+
 
 def main():
     parser = argparse.ArgumentParser(description='Find latent representation of reference images using perceptual losses', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -26,7 +31,7 @@ def main():
     parser.add_argument('--mask_dir', default='masks', help='Directory for storing optional masks')
     parser.add_argument('--load_last', default='', help='Start with embeddings from directory')
     parser.add_argument('--dlatent_avg', default='', help='Use dlatent from file specified here for truncation instead of dlatent_avg from Gs')
-    parser.add_argument('--model_url', default='https://drive.google.com/uc?export=download&id=1Ru1kpacSvmheTHP7evEGHEegXZjeTaoi', help='Fetch a StyleGAN model to train on from this URL') # karras2019stylegan-ffhq-1024x1024.pkl
+    parser.add_argument('--model_url', default=url_styleGAN, help='Fetch a StyleGAN model to train on from this URL') # karras2019stylegan-ffhq-1024x1024.pkl
     parser.add_argument('--model_res', default=1024, help='The dimension of images in the StyleGAN model', type=int)
     parser.add_argument('--batch_size', default=1, help='Batch size for generator and perceptual model', type=int)
 
@@ -38,7 +43,7 @@ def main():
     parser.add_argument('--iterations', default=100, help='Number of optimization steps for each batch', type=int)
     parser.add_argument('--decay_steps', default=10, help='Decay steps for learning rate decay (as a percent of iterations)', type=float)
     parser.add_argument('--load_effnet', default='data/finetuned_effnet.h5', help='Model to load for EfficientNet approximation of dlatents')
-    parser.add_argument('--load_resnet', default='https://drive.google.com/uc?id=1aT59NFy9-bNyXjDuZOTMl0qX0jmZc6Zb', help='Model to load for ResNet approximation of dlatents')
+    parser.add_argument('--load_resnet', default=True, help='Model to load for ResNet approximation of dlatents')
 
     # Loss function options
     parser.add_argument('--use_vgg_loss', default=0.4, help='Use VGG perceptual loss; 0 to disable, > 0 to scale.', type=float)
@@ -99,8 +104,8 @@ def main():
 
     perc_model = None
     if (args.use_lpips_loss > 0.00000001):
-        with dnnlib.util.open_url('https://drive.google.com/uc?export=download&id=1poMANPSNDHALZRuaqJGrl1EVOP1WNjLv', cache_dir=config.cache_dir) as f:
-            perc_model =  pickle.load(f)
+        with dnnlib.util.open_url(url_VGG_perceptual, cache_dir=config.cache_dir) as f:
+            perc_model = pickle.load(f)
     perceptual_model = PerceptualModel(args, perc_model=perc_model, batch_size=args.batch_size)
     perceptual_model.build_perceptual_model(generator)
 
@@ -125,10 +130,10 @@ def main():
                     dlatents = np.vstack((dlatents,dl))
         else:
             if (ff_model is None):
-                if args.load_resnet is not None:
+                if args.load_resnet:
                     print("\nLoading ResNet Model:")
                     resnet_model_fn = 'data/finetuned_resnet.h5'
-                    gdown.download(args.load_resnet, resnet_model_fn, quiet=False)
+                    gdown.download(url_resnet, resnet_model_fn, quiet=False)
                     ff_model = load_model(resnet_model_fn)
                     from keras.applications.resnet50 import preprocess_input
             if (ff_model is None):

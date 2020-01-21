@@ -4,6 +4,11 @@ from PIL import Image
 import dnnlib.tflib as tflib
 
 
+def split_to_batches(l, n):
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+
 def display_folder_content(folder, res=256):
     if folder[-1] != '/': folder += '/'
     for i, img_path in enumerate(sorted(os.listdir(folder))):
