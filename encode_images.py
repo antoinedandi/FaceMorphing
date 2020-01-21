@@ -74,6 +74,12 @@ def main():
 
     args, other_args = parser.parse_known_args()
 
+    # test
+    print('\n')
+    print(type(args.load_resnet))
+    print(args.load_resnet)
+
+
     args.decay_steps *= 0.01 * args.iterations # Calculate steps as a percent of total iterations
 
     if args.output_video:
@@ -131,8 +137,6 @@ def main():
         else:
             if (ff_model is None):
                 if (args.load_resnet):
-                    print(type(args.load_resnet))
-                    print(args.load_resnet)
                     print("\nLoading ResNet Model:")
                     resnet_model_fn = 'data/finetuned_resnet.h5'
                     gdown.download(url_resnet, resnet_model_fn, quiet=False)
