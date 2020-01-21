@@ -131,7 +131,7 @@ def main():
         else:
             if (ff_model is None):
                 if (args.load_resnet):
-                    print(args.load_resnet)
+                    print(type(args.load_resnet))
                     print("\nLoading ResNet Model:")
                     resnet_model_fn = 'data/finetuned_resnet.h5'
                     gdown.download(url_resnet, resnet_model_fn, quiet=False)
