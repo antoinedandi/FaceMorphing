@@ -57,7 +57,7 @@ def perform_face_morphing(w_vectors, generator, original_imgs, reconstructed_img
     imgs1 = sorted([f for f in os.listdir(original_imgs) if '.png' in f])
     imgs2 = sorted([f for f in os.listdir(reconstructed_imgs) if '.png' in f])
 
-    n_images = w_vectors.shape[0]
+    n_images = len(imgs1)
     n_rows = n_images + 1
     n_cols = n_images + 2
 
