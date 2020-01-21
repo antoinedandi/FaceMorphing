@@ -20,7 +20,6 @@ url_resnet = 'https://drive.google.com/uc?id=1aT59NFy9-bNyXjDuZOTMl0qX0jmZc6Zb'
 url_VGG_perceptual = 'https://drive.google.com/uc?export=download&id=1poMANPSNDHALZRuaqJGrl1EVOP1WNjLv'
 
 
-
 def main():
     parser = argparse.ArgumentParser(description='Find latent representation of reference images using perceptual losses', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('src_dir', help='Directory with images for encoding')
