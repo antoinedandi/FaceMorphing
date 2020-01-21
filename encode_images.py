@@ -43,7 +43,8 @@ def main():
     parser.add_argument('--iterations', default=100, help='Number of optimization steps for each batch', type=int)
     parser.add_argument('--decay_steps', default=10, help='Decay steps for learning rate decay (as a percent of iterations)', type=float)
     parser.add_argument('--load_effnet', default='data/finetuned_effnet.h5', help='Model to load for EfficientNet approximation of dlatents')
-    parser.add_argument('--load_resnet', default=True, help='Model to load for ResNet approximation of dlatents', type=bool)
+    # parser.add_argument('--load_resnet', default=True, help='Model to load for ResNet approximation of dlatents', type=bool)
+    parser.add_argument('--use_resnet', help='Use pretrained ResNet for approximating dlatents', action='store_true')
 
     # Loss function options
     parser.add_argument('--use_vgg_loss', default=0.4, help='Use VGG perceptual loss; 0 to disable, > 0 to scale.', type=float)
@@ -73,12 +74,6 @@ def main():
     parser.add_argument('--video_skip', default=1, help='Only write every n frames (1 = write every frame)', type=int)
 
     args, other_args = parser.parse_known_args()
-
-    # test
-    print('\n')
-    print(type(args.load_resnet))
-    print(args.load_resnet)
-
 
     args.decay_steps *= 0.01 * args.iterations # Calculate steps as a percent of total iterations
 
@@ -136,7 +131,7 @@ def main():
                     dlatents = np.vstack((dlatents,dl))
         else:
             if (ff_model is None):
-                if (args.load_resnet):
+                if (args.use_resnet):
                     print("\nLoading ResNet Model:")
                     resnet_model_fn = 'data/finetuned_resnet.h5'
                     gdown.download(url_resnet, resnet_model_fn, quiet=False)
