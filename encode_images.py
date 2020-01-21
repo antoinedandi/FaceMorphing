@@ -43,7 +43,7 @@ def main():
     parser.add_argument('--iterations', default=100, help='Number of optimization steps for each batch', type=int)
     parser.add_argument('--decay_steps', default=10, help='Decay steps for learning rate decay (as a percent of iterations)', type=float)
     parser.add_argument('--load_effnet', default='data/finetuned_effnet.h5', help='Model to load for EfficientNet approximation of dlatents')
-    parser.add_argument('--load_resnet', default=True, help='Model to load for ResNet approximation of dlatents')
+    parser.add_argument('--load_resnet', default=True, help='Model to load for ResNet approximation of dlatents', type=bool)
 
     # Loss function options
     parser.add_argument('--use_vgg_loss', default=0.4, help='Use VGG perceptual loss; 0 to disable, > 0 to scale.', type=float)
