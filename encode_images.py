@@ -54,6 +54,11 @@ def main():
     parser.add_argument('--tile_dlatents', default=False, help='Tile dlatents to use a single vector at each scale', type=bool)
     parser.add_argument('--clipping_threshold', default=2.0, help='Stochastic clipping of gradient values outside of this threshold', type=float)
 
+    # Masking params
+    parser.add_argument('--face_mask', default=False, help='Generate a mask for predicting only the face area', type=bool)
+    parser.add_argument('--use_grabcut', default=True, help='Use grabcut algorithm on the face mask to better segment the foreground', type=bool)
+    parser.add_argument('--scale_mask', default=1.5, help='Look over a wider section of foreground for grabcut', type=float)
+
     args, other_args = parser.parse_known_args()
 
     args.decay_steps *= 0.01 * args.iterations  # Calculate steps as a percent of total iterations
