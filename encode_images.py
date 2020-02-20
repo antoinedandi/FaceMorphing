@@ -178,12 +178,22 @@ def main():
         generator.set_dlatents(best_dlatent)
         generated_images = generator.generate_images()
         generated_dlatents = generator.get_dlatents()
-        np.save(os.path.join(args.dlatent_dir, 'output_vectors.npy'), best_dlatent)
+        # np.save(os.path.join(args.dlatent_dir, 'output_vectors.npy'), best_dlatent)
         for img_array, dlatent, img_name in zip(generated_images, generated_dlatents, names):
             img = PIL.Image.fromarray(img_array, 'RGB')
             img.save(os.path.join(args.generated_images_dir, f'{img_name}.png'), 'PNG')
             np.save(os.path.join(args.dlatent_dir, f'{img_name}.npy'), dlatent)
         generator.reset_dlatents()
+
+    # Concatenate the saved dlalents vectors
+    # final_w_vectors = []
+    # for dlatent in list_dlatents:
+    #     w = np.load('latent_representations/' + dlatent)
+    #     final_w_vectors.append(w)
+
+    list_dlatents = sorted(os.listdir(args.dlatent_dir))
+    final_w_vectors = np.array([np.load('latent_representations/' + dlatent) for dlatent in list_dlatents])
+    np.save(os.path.join(args.dlatent_dir, 'output_vectors.npy'), final_w_vectors)
 
 
 if __name__ == "__main__":
