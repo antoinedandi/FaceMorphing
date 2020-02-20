@@ -56,13 +56,13 @@ def main():
     parser.add_argument('--tile_dlatents', default=False, help='Tile dlatents to use a single vector at each scale', type=bool)
     parser.add_argument('--clipping_threshold', default=2.0, help='Stochastic clipping of gradient values outside of this threshold', type=float)
 
-    # Masking params
+    # Masking params -> DEGAGER
     parser.add_argument('--load_mask', default=False, help='Load segmentation masks', type=bool)
     parser.add_argument('--face_mask', default=False, help='Generate a mask for predicting only the face area', type=bool)
     parser.add_argument('--use_grabcut', default=True, help='Use grabcut algorithm on the face mask to better segment the foreground', type=bool)
     parser.add_argument('--scale_mask', default=1.5, help='Look over a wider section of foreground for grabcut', type=float)
 
-    # Video params
+    # Video params   -> DEGAGER
     parser.add_argument('--video_dir', default='videos', help='Directory for storing training videos')
     parser.add_argument('--output_video', default=False, help='Generate videos of the optimization process', type=bool)
     parser.add_argument('--video_codec', default='MJPG', help='FOURCC-supported video codec name')
@@ -178,19 +178,13 @@ def main():
         generator.set_dlatents(best_dlatent)
         generated_images = generator.generate_images()
         generated_dlatents = generator.get_dlatents()
-        # np.save(os.path.join(args.dlatent_dir, 'output_vectors.npy'), best_dlatent)
         for img_array, dlatent, img_name in zip(generated_images, generated_dlatents, names):
             img = PIL.Image.fromarray(img_array, 'RGB')
             img.save(os.path.join(args.generated_images_dir, f'{img_name}.png'), 'PNG')
             np.save(os.path.join(args.dlatent_dir, f'{img_name}.npy'), dlatent)
         generator.reset_dlatents()
 
-    # Concatenate the saved dlalents vectors
-    # final_w_vectors = []
-    # for dlatent in list_dlatents:
-    #     w = np.load('latent_representations/' + dlatent)
-    #     final_w_vectors.append(w)
-
+    # Concatenate and save dlalents vectors
     list_dlatents = sorted(os.listdir(args.dlatent_dir))
     final_w_vectors = np.array([np.load('latent_representations/' + dlatent) for dlatent in list_dlatents])
     np.save(os.path.join(args.dlatent_dir, 'output_vectors.npy'), final_w_vectors)
