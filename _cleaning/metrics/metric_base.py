@@ -12,12 +12,12 @@ import time
 import hashlib
 import numpy as np
 import tensorflow as tf
-import dnnlib
-import dnnlib.tflib as tflib
+from utils import dnnlib
+import utils.dnnlib.tflib as tflib
 
-import config
-from training import misc
-from training import dataset
+from _cleaning import config
+from _cleaning.training import misc
+from _cleaning.training import dataset
 
 #----------------------------------------------------------------------------
 # Standard metrics.
@@ -64,7 +64,7 @@ class MetricBase:
             result_str = self.get_result_str()
             if run_dir is not None:
                 log = os.path.join(run_dir, 'metric-%s.txt' % self.name)
-                with dnnlib.util.Logger(log, 'a'):
+                with utils.dnnlib.util.Logger(log, 'a'):
                     print(result_str)
             else:
                 print(result_str)
@@ -74,7 +74,7 @@ class MetricBase:
         if len(network_name) > 29:
             network_name = '...' + network_name[-26:]
         result_str = '%-30s' % network_name
-        result_str += ' time %-12s' % dnnlib.util.format_time(self._eval_time)
+        result_str += ' time %-12s' % utils.dnnlib.util.format_time(self._eval_time)
         for res in self._results:
             result_str += ' ' + self.name + res.suffix + ' '
             result_str += res.fmt % res.value
@@ -82,7 +82,7 @@ class MetricBase:
 
     def update_autosummaries(self):
         for res in self._results:
-            tflib.autosummary.autosummary('Metrics/' + self.name + res.suffix, res.value)
+            utils.dnnlib.tflib.autosummary.autosummary('Metrics/' + self.name + res.suffix, res.value)
 
     def _evaluate(self, Gs, num_gpus):
         raise NotImplementedError # to be overridden by subclasses
@@ -118,7 +118,7 @@ class MetricBase:
 
 class MetricGroup:
     def __init__(self, metric_kwarg_list):
-        self.metrics = [dnnlib.util.call_func_by_name(**kwargs) for kwargs in metric_kwarg_list]
+        self.metrics = [utils.dnnlib.util.call_func_by_name(**kwargs) for kwargs in metric_kwarg_list]
 
     def run(self, *args, **kwargs):
         for metric in self.metrics:

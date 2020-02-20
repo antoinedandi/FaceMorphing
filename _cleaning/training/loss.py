@@ -8,8 +8,8 @@
 """Loss functions."""
 
 import tensorflow as tf
-import dnnlib.tflib as tflib
-from dnnlib.tflib.autosummary import autosummary
+import utils.dnnlib.tflib as tflib
+from utils.dnnlib.tflib import autosummary
 
 #----------------------------------------------------------------------------
 # Convenience func that casts all of its arguments to tf.float32.

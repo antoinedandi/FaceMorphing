@@ -8,7 +8,6 @@
 """Submit a function to be run either locally or in a computing cluster."""
 
 import copy
-import io
 import os
 import pathlib
 import pickle
@@ -19,12 +18,9 @@ import shutil
 import time
 import traceback
 
-import zipfile
-
 from enum import Enum
 
 from .. import util
-from ..util import EasyDict
 
 
 class SubmitTarget(Enum):
@@ -233,7 +229,7 @@ def run_wrapper(submit_config: SubmitConfig) -> None:
     else:  # when running in a cluster, redirect stderr to stdout, and just force flushing (log writing is handled by run.sh)
         logger = util.Logger(file_name=None, should_flush=True)
 
-    import dnnlib
+    from utils import dnnlib
     dnnlib.submit_config = submit_config
 
     try:

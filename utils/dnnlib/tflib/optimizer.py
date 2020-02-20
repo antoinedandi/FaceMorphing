@@ -80,7 +80,8 @@ class Optimizer:
             self._grad_shapes = [tfutil.shape_to_list(var.shape) for var in trainable_vars]
 
         assert len(trainable_vars) == len(self._grad_shapes)
-        assert all(tfutil.shape_to_list(var.shape) == var_shape for var, var_shape in zip(trainable_vars, self._grad_shapes))
+        assert all(
+            tfutil.shape_to_list(var.shape) == var_shape for var, var_shape in zip(trainable_vars, self._grad_shapes))
 
         dev = loss.device
 
@@ -168,7 +169,8 @@ class Optimizer:
                     if dev == devices[-1]:
                         with tf.name_scope("Statistics"):
                             ops.append(autosummary.autosummary(self.id + "/learning_rate", self.learning_rate))
-                            ops.append(autosummary.autosummary(self.id + "/overflow_frequency", tf.where(grad_ok, 0, 1)))
+                            ops.append(
+                                autosummary.autosummary(self.id + "/overflow_frequency", tf.where(grad_ok, 0, 1)))
 
                             if self.use_loss_scaling:
                                 ops.append(autosummary.autosummary(self.id + "/loss_scaling_log2", ls_var))

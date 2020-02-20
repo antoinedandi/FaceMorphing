@@ -8,11 +8,11 @@
 """Main entry point for training StyleGAN and ProGAN networks."""
 
 import copy
-import dnnlib
-from dnnlib import EasyDict
+from utils import dnnlib
+from utils.dnnlib import EasyDict
 
-import config
-from metrics import metric_base
+from _cleaning import config
+from _cleaning.metrics import metric_base
 
 #----------------------------------------------------------------------------
 # Official training configs for StyleGAN, targeted mainly for FFHQ.
@@ -186,7 +186,7 @@ def main():
     kwargs.update(G_args=G, D_args=D, G_opt_args=G_opt, D_opt_args=D_opt, G_loss_args=G_loss, D_loss_args=D_loss)
     kwargs.update(dataset_args=dataset, sched_args=sched, grid_args=grid, metric_arg_list=metrics, tf_config=tf_config)
     kwargs.submit_config = copy.deepcopy(submit_config)
-    kwargs.submit_config.run_dir_root = dnnlib.submission.submit.get_template_from_path(config.result_dir)
+    kwargs.submit_config.run_dir_root = utils.dnnlib.submission.submit.get_template_from_path(config.result_dir)
     kwargs.submit_config.run_dir_ignore += config.run_dir_ignore
     kwargs.submit_config.run_desc = desc
     dnnlib.submit_run(**kwargs)

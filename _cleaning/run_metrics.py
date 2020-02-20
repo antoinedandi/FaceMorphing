@@ -7,13 +7,14 @@
 
 """Main entry point for training StyleGAN and ProGAN networks."""
 
-import dnnlib
-from dnnlib import EasyDict
-import dnnlib.tflib as tflib
+from utils import dnnlib
+from utils.dnnlib import EasyDict
+import utils.dnnlib.tflib as tflib
 
-import config
-from metrics import metric_base
-from training import misc
+from _cleaning import config
+from _cleaning.metrics import metric_base
+from _cleaning.training import misc
+
 
 #----------------------------------------------------------------------------
 
@@ -21,7 +22,7 @@ def run_pickle(submit_config, metric_args, network_pkl, dataset_args, mirror_aug
     ctx = dnnlib.RunContext(submit_config)
     tflib.init_tf()
     print('Evaluating %s metric on network_pkl "%s"...' % (metric_args.name, network_pkl))
-    metric = dnnlib.util.call_func_by_name(**metric_args)
+    metric = utils.dnnlib.util.call_func_by_name(**metric_args)
     print()
     metric.run(network_pkl, dataset_args=dataset_args, mirror_augment=mirror_augment, num_gpus=submit_config.num_gpus)
     print()
@@ -35,7 +36,7 @@ def run_snapshot(submit_config, metric_args, run_id, snapshot):
     print('Evaluating %s metric on run_id %s, snapshot %s...' % (metric_args.name, run_id, snapshot))
     run_dir = misc.locate_run_dir(run_id)
     network_pkl = misc.locate_network_pkl(run_dir, snapshot)
-    metric = dnnlib.util.call_func_by_name(**metric_args)
+    metric = utils.dnnlib.util.call_func_by_name(**metric_args)
     print()
     metric.run(network_pkl, run_dir=run_dir, num_gpus=submit_config.num_gpus)
     print()
@@ -49,7 +50,7 @@ def run_all_snapshots(submit_config, metric_args, run_id):
     print('Evaluating %s metric on all snapshots of run_id %s...' % (metric_args.name, run_id))
     run_dir = misc.locate_run_dir(run_id)
     network_pkls = misc.list_network_pkls(run_dir)
-    metric = dnnlib.util.call_func_by_name(**metric_args)
+    metric = utils.dnnlib.util.call_func_by_name(**metric_args)
     print()
     for idx, network_pkl in enumerate(network_pkls):
         ctx.update('', idx, len(network_pkls))
@@ -85,7 +86,7 @@ def main():
     #submit_config.num_gpus = 8
 
     # Execute.
-    submit_config.run_dir_root = dnnlib.submission.submit.get_template_from_path(config.result_dir)
+    submit_config.run_dir_root = utils.dnnlib.submission.submit.get_template_from_path(config.result_dir)
     submit_config.run_dir_ignore += config.run_dir_ignore
     for task in tasks:
         for metric in metrics:

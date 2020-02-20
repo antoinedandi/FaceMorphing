@@ -8,11 +8,11 @@
 """Network architectures used in the StyleGAN paper."""
 
 import math
-import config
+from _cleaning import config
 import numpy as np
 import tensorflow as tf
-import dnnlib
-import dnnlib.tflib as tflib
+from utils import dnnlib
+import utils.dnnlib.tflib as tflib
 
 # NOTE: Do not import any application-specific modules here!
 # Specify all network parameters as kwargs.
@@ -629,7 +629,8 @@ def G_synthesis(
         def grow(x, res, lod):
             y = block(res, x)
             img = lambda: upscale2d(torgb(res, y), 2**lod)
-            img = cset(img, (lod_in > lod), lambda: upscale2d(tflib.lerp(torgb(res, y), upscale2d(torgb(res - 1, x)), lod_in - lod), 2**lod))
+            img = cset(img, (lod_in > lod), lambda: upscale2d(
+                tflib.lerp(torgb(res, y), upscale2d(torgb(res - 1, x)), lod_in - lod), 2 ** lod))
             if lod > 0: img = cset(img, (lod_in < lod), lambda: grow(y, res + 1, lod - 1))
             return img()
         images_out = grow(x, 3, resolution_log2 - 3)
@@ -724,7 +725,7 @@ def D_basic(
             x = lambda: fromrgb(downscale2d(images_in, 2**lod), res)
             if lod > 0: x = cset(x, (lod_in < lod), lambda: grow(res + 1, lod - 1))
             x = block(x(), res); y = lambda: x
-            if res > 2: y = cset(y, (lod_in > lod), lambda: tflib.lerp(x, fromrgb(downscale2d(images_in, 2**(lod+1)), res - 1), lod_in - lod))
+            if res > 2: y = cset(y, (lod_in > lod), lambda: tflib.lerp(x, fromrgb(downscale2d(images_in, 2 ** (lod + 1)), res - 1), lod_in - lod))
             return y()
         scores_out = grow(2, resolution_log2 - 2)
 

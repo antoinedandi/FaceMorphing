@@ -14,18 +14,17 @@ import re
 import numpy as np
 from collections import defaultdict
 import PIL.Image
-import dnnlib
 
-import config
-from training import dataset
+from _cleaning import config
+from _cleaning.training import dataset
 
 #----------------------------------------------------------------------------
 # Convenience wrappers for pickle that are able to load data produced by
 # older versions of the code, and from external URLs.
 
 def open_file_or_url(file_or_url):
-    if dnnlib.util.is_url(file_or_url):
-        return dnnlib.util.open_url(file_or_url, cache_dir=config.cache_dir)
+    if utils.dnnlib.util.is_url(file_or_url):
+        return utils.dnnlib.util.open_url(file_or_url, cache_dir=config.cache_dir)
     return open(file_or_url, 'rb')
 
 def load_pkl(file_or_url):
@@ -93,7 +92,7 @@ def locate_run_dir(run_id_or_run_dir):
     if isinstance(run_id_or_run_dir, str):
         if os.path.isdir(run_id_or_run_dir):
             return run_id_or_run_dir
-        converted = dnnlib.submission.submit.convert_path(run_id_or_run_dir)
+        converted = utils.dnnlib.submission.submit.convert_path(run_id_or_run_dir)
         if os.path.isdir(converted):
             return converted
 
@@ -132,7 +131,7 @@ def locate_network_pkl(run_id_or_run_dir_or_network_pkl, snapshot_or_network_pkl
         if isinstance(candidate, str):
             if os.path.isfile(candidate):
                 return candidate
-            converted = dnnlib.submission.submit.convert_path(candidate)
+            converted = utils.dnnlib.submission.submit.convert_path(candidate)
             if os.path.isfile(converted):
                 return converted
 

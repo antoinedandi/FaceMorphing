@@ -18,9 +18,9 @@ import traceback
 import numpy as np
 import tensorflow as tf
 import PIL.Image
-import dnnlib.tflib as tflib
+import utils.dnnlib.tflib as tflib
 
-from training import dataset
+from _cleaning.training import dataset
 
 #----------------------------------------------------------------------------
 
@@ -693,9 +693,6 @@ def create_CUB(tfrecord_dir, CUB_dir):
 #----------------------------------------------------------------------------
 
 def create_coco(tfrecord_dir, coco_dir, res=256, type='test'):
-    import json
-    import pickle
-
     tfrecord_dir = tfrecord_dir+'_{}'.format(type)
     # annotations = json.load(open(os.path.join(coco_dir, 'annotations/instances_train2014.json')))
 

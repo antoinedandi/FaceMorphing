@@ -11,10 +11,11 @@ import os
 import numpy as np
 import scipy
 import tensorflow as tf
-import dnnlib.tflib as tflib
+import utils.dnnlib.tflib as tflib
 
-from metrics import metric_base
-from training import misc
+from _cleaning.metrics import metric_base
+from _cleaning.training import misc
+
 
 #----------------------------------------------------------------------------
 
@@ -59,7 +60,7 @@ class FID(metric_base.MetricBase):
         # Calculate statistics for fakes.
         for begin in range(0, self.num_images, minibatch_size):
             end = min(begin + minibatch_size, self.num_images)
-            activations[begin:end] = np.concatenate(tflib.run(result_expr), axis=0)[:end-begin]
+            activations[begin:end] = np.concatenate(tflib.run(result_expr), axis=0)[:end - begin]
         mu_fake = np.mean(activations, axis=0)
         sigma_fake = np.cov(activations, rowvar=False)
 

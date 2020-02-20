@@ -1,11 +1,9 @@
 import os
-import sys
 import bz2
 import argparse
 from keras.utils import get_file
-from ffhq_dataset.face_alignment import image_align
-from ffhq_dataset.landmarks_detector import LandmarksDetector
-import multiprocessing
+from utils.face_utilities.face_alignment import image_align
+from utils.face_utilities.landmarks_detector import LandmarksDetector
 
 LANDMARKS_MODEL_URL = 'http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2'
 

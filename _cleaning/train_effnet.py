@@ -9,11 +9,9 @@ import pickle
 import cv2
 import argparse
 
-import dnnlib
-import config
-import dnnlib.tflib as tflib
+from _cleaning import config
+import utils.dnnlib.tflib as tflib
 
-import tensorflow
 import keras.backend as K
 
 from efficientnet import EfficientNetB0, EfficientNetB1, EfficientNetB2, EfficientNetB3, preprocess_input
@@ -307,7 +305,7 @@ tflib.init_tf()
 
 model = get_effnet_model(args.model_path, model_res=args.model_res, depth=args.model_depth, size=args.model_size, activation=args.activation, optimizer=args.optimizer, loss=args.loss)
 
-with dnnlib.util.open_url(args.model_url, cache_dir=config.cache_dir) as f:
+with utils.dnnlib.util.open_url(args.model_url, cache_dir=config.cache_dir) as f:
     generator_network, discriminator_network, Gs_network = pickle.load(f)
 
 def load_Gs():

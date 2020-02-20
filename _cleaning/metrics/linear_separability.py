@@ -11,10 +11,10 @@ from collections import defaultdict
 import numpy as np
 import sklearn.svm
 import tensorflow as tf
-import dnnlib.tflib as tflib
+import utils.dnnlib.tflib as tflib
 
-from metrics import metric_base
-from training import misc
+from _cleaning.metrics import metric_base
+from _cleaning.training import misc
 
 #----------------------------------------------------------------------------
 

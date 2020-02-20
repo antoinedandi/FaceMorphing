@@ -17,7 +17,8 @@ import pickle
 import sys
 
 # PYTHONPATH should have been set so that the run_dir/src is in it
-import dnnlib
+from utils import dnnlib
+
 
 def main():
     if not len(sys.argv) >= 4:
@@ -34,12 +35,12 @@ def main():
         raise RuntimeError("SubmitConfig pickle file does not exist!")
 
     submit_config: dnnlib.SubmitConfig = pickle.load(open(submit_config_path, "rb"))
-    dnnlib.submission.submit.set_user_name_override(submit_config.user_name)
+    utils.dnnlib.submission.submit.set_user_name_override(submit_config.user_name)
 
     submit_config.task_name = task_name
     submit_config.host_name = host_name
 
-    dnnlib.submission.submit.run_wrapper(submit_config)
+    utils.dnnlib.submission.submit.run_wrapper(submit_config)
 
 if __name__ == "__main__":
     main()

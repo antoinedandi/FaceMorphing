@@ -1,7 +1,7 @@
 import math
 import tensorflow as tf
 import numpy as np
-import dnnlib.tflib as tflib
+import utils.dnnlib.tflib as tflib
 from functools import partial
 
 

@@ -10,15 +10,15 @@
 import os
 import numpy as np
 import tensorflow as tf
-import dnnlib
-import dnnlib.tflib as tflib
-from dnnlib.tflib.autosummary import autosummary
+from utils import dnnlib
+import utils.dnnlib.tflib as tflib
+from utils.dnnlib.tflib import autosummary
 
-import config
-import train
-from training import dataset
-from training import misc
-from metrics import metric_base
+from _cleaning import config, train
+from _cleaning.training import dataset
+from _cleaning.training import misc
+from _cleaning.metrics import metric_base
+
 
 #----------------------------------------------------------------------------
 # Just-in-time processing of training images before feeding them to the networks.
@@ -204,9 +204,9 @@ def training_loop(
             reals, labels = training_set.get_minibatch_tf()
             reals = process_reals(reals, lod_in, mirror_augment, training_set.dynamic_range, drange_net)
             with tf.name_scope('G_loss'), tf.control_dependencies(lod_assign_ops):
-                G_loss = dnnlib.util.call_func_by_name(G=G_gpu, D=D_gpu, opt=G_opt, training_set=training_set, minibatch_size=minibatch_split, **G_loss_args)
+                G_loss = utils.dnnlib.util.call_func_by_name(G=G_gpu, D=D_gpu, opt=G_opt, training_set=training_set, minibatch_size=minibatch_split, **G_loss_args)
             with tf.name_scope('D_loss'), tf.control_dependencies(lod_assign_ops):
-                D_loss = dnnlib.util.call_func_by_name(G=G_gpu, D=D_gpu, opt=D_opt, training_set=training_set, minibatch_size=minibatch_split, reals=reals, labels=labels, **D_loss_args)
+                D_loss = utils.dnnlib.util.call_func_by_name(G=G_gpu, D=D_gpu, opt=D_opt, training_set=training_set, minibatch_size=minibatch_split, reals=reals, labels=labels, **D_loss_args)
             G_opt.register_gradients(tf.reduce_mean(G_loss), G_gpu.trainables)
             D_opt.register_gradients(tf.reduce_mean(D_loss), D_gpu.trainables)
     G_train_op = G_opt.apply_updates()
@@ -274,7 +274,7 @@ def training_loop(
                 autosummary('Progress/kimg', cur_nimg / 1000.0),
                 autosummary('Progress/lod', sched.lod),
                 autosummary('Progress/minibatch', sched.minibatch),
-                dnnlib.util.format_time(autosummary('Timing/total_sec', total_time)),
+                utils.dnnlib.util.format_time(autosummary('Timing/total_sec', total_time)),
                 autosummary('Timing/sec_per_tick', tick_time),
                 autosummary('Timing/sec_per_kimg', tick_time / tick_kimg),
                 autosummary('Timing/maintenance_sec', maintenance_time),
@@ -293,7 +293,7 @@ def training_loop(
 
             # Update summaries and RunContext.
             metrics.update_autosummaries()
-            tflib.autosummary.save_summaries(summary_log, cur_nimg)
+            utils.dnnlib.tflib.autosummary.save_summaries(summary_log, cur_nimg)
             ctx.update('%.2f' % sched.lod, cur_epoch=cur_nimg // 1000, max_epoch=total_kimg)
             maintenance_time = ctx.get_last_update_interval() - tick_time
 
