@@ -27,7 +27,6 @@ def main():
     parser.add_argument('generated_images_dir', help='Directory for storing generated images')
     parser.add_argument('guessed_images_dir', help='Directory for storing initially guessed images')
     parser.add_argument('dlatent_dir', help='Directory for storing dlatent representations')
-    parser.add_argument('--mask_dir', default='masks', help='Directory for storing optional masks')
 
     # General params
     parser.add_argument('--model_res', default=1024, help='The dimension of images in the StyleGAN model', type=int)
@@ -51,13 +50,14 @@ def main():
     parser.add_argument('--use_l1_penalty', default=1, help='Use L1 penalty on latents; 0 to disable, > 0 to scale.', type=float)
 
     # Generator params
-    parser.add_argument('--randomize_noise', default=False, help='Add noise to dlatents during optimization', type=bool)
-    parser.add_argument('--tile_dlatents', default=False, help='Tile dlatents to use a single vector at each scale', type=bool)
+    parser.add_argument('--randomize_noise', default=False, help='Add noise to dlatents during optimization', type=lambda x: (str(x).lower() == 'true'))
+    parser.add_argument('--tile_dlatents', default=False, help='Tile dlatents to use a single vector at each scale', type=lambda x: (str(x).lower() == 'true'))
     parser.add_argument('--clipping_threshold', default=2.0, help='Stochastic clipping of gradient values outside of this threshold', type=float)
 
     # Masking params
-    parser.add_argument('--face_mask', default=False, help='Generate a mask for predicting only the face area', type=bool)
-    parser.add_argument('--use_grabcut', default=True, help='Use grabcut algorithm on the face mask to better segment the foreground', type=bool)
+    parser.add_argument('--mask_dir', default='masks', help='Directory for storing optional masks')
+    parser.add_argument('--face_mask', default=False, help='Generate a mask for predicting only the face area', type=lambda x: (str(x).lower() == 'true'))
+    parser.add_argument('--use_grabcut', default=True, help='Use grabcut algorithm on the face mask to better segment the foreground', type=lambda x: (str(x).lower() == 'true'))
     parser.add_argument('--scale_mask', default=1.5, help='Look over a wider section of foreground for grabcut', type=float)
 
     args, other_args = parser.parse_known_args()
@@ -75,6 +75,8 @@ def main():
     os.makedirs(args.generated_images_dir, exist_ok=True)
     os.makedirs(args.guessed_images_dir, exist_ok=True)
     os.makedirs(args.dlatent_dir, exist_ok=True)
+    if args.face_mask:
+        os.makedirs(args.mask_dir, exist_ok=True)
 
     # Initialize generator and perceptual model
     tflib.init_tf()
