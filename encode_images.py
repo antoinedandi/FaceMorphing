@@ -27,6 +27,7 @@ def main():
     parser.add_argument('generated_images_dir', help='Directory for storing generated images')
     parser.add_argument('guessed_images_dir', help='Directory for storing initially guessed images')
     parser.add_argument('dlatent_dir', help='Directory for storing dlatent representations')
+    parser.add_argument('--mask_dir', default='masks', help='Directory for storing optional masks')
 
     # General params
     parser.add_argument('--model_res', default=1024, help='The dimension of images in the StyleGAN model', type=int)
