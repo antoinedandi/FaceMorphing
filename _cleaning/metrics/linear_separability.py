@@ -11,7 +11,7 @@ from collections import defaultdict
 import numpy as np
 import sklearn.svm
 import tensorflow as tf
-import utils.dnnlib.tflib as tflib
+import dnnlib.tflib as tflib
 
 from _cleaning.metrics import metric_base
 from _cleaning.training import misc

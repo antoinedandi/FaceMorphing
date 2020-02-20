@@ -1,7 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 from PIL import Image
-import utils.dnnlib.tflib as tflib
+import dnnlib.tflib as tflib
 
 
 def split_to_batches(l, n):

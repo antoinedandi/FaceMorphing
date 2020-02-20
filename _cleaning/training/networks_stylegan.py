@@ -11,8 +11,8 @@ import math
 from _cleaning import config
 import numpy as np
 import tensorflow as tf
-from utils import dnnlib
-import utils.dnnlib.tflib as tflib
+import dnnlib
+import dnnlib.tflib as tflib
 
 # NOTE: Do not import any application-specific modules here!
 # Specify all network parameters as kwargs.

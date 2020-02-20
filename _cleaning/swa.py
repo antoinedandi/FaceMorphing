@@ -6,7 +6,7 @@ import os
 import glob
 import pickle
 import argparse
-from utils.dnnlib.tflib import init_tf
+from dnnlib.tflib import init_tf
 
 filepath = 'output.pkl'
 

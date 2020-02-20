@@ -18,7 +18,7 @@ import traceback
 import numpy as np
 import tensorflow as tf
 import PIL.Image
-import utils.dnnlib.tflib as tflib
+import dnnlib.tflib as tflib
 
 from _cleaning.training import dataset
 

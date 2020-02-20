@@ -10,9 +10,9 @@
 import os
 import numpy as np
 import tensorflow as tf
-from utils import dnnlib
-import utils.dnnlib.tflib as tflib
-from utils.dnnlib.tflib import autosummary
+import dnnlib
+import dnnlib.tflib as tflib
+from dnnlib.tflib import autosummary
 
 from _cleaning import config, train
 from _cleaning.training import dataset
@@ -278,7 +278,7 @@ def training_loop(
                 autosummary('Timing/sec_per_tick', tick_time),
                 autosummary('Timing/sec_per_kimg', tick_time / tick_kimg),
                 autosummary('Timing/maintenance_sec', maintenance_time),
-                autosummary('Resources/peak_gpu_mem_gb', peak_gpu_mem_op.eval() / 2**30)))
+                autosummary('Resources/peak_gpu_mem_gb', peak_gpu_mem_op.eval() / 2 ** 30)))
             autosummary('Timing/total_hours', total_time / (60.0 * 60.0))
             autosummary('Timing/total_days', total_time / (24.0 * 60.0 * 60.0))
 

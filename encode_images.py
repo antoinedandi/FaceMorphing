@@ -5,8 +5,8 @@ from tqdm import tqdm
 import PIL.Image
 import numpy as np
 import gdown
-import utils.dnnlib.tflib as tflib
-from utils.dnnlib.util import open_url
+import dnnlib.tflib as tflib
+from dnnlib.util import open_url
 from utils.utils import split_to_batches
 from encoder.generator_model import Generator
 from encoder.perceptual_model import PerceptualModel, load_images

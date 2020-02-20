@@ -9,8 +9,8 @@ import pickle
 import cv2
 import argparse
 
-from utils.dnnlib.util import open_url
-import utils.dnnlib.tflib as tflib
+from dnnlib.util import open_url
+import dnnlib.tflib as tflib
 
 import keras
 import keras.backend as K

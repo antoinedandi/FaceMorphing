@@ -13,7 +13,7 @@ import numpy as np
 import PIL.Image
 from PIL import Image
 
-import utils.dnnlib.tflib as tflib
+import dnnlib.tflib as tflib
 from _cleaning import config
 
 fmt = dict(func=tflib.convert_images_to_uint8, nchw_to_nhwc=True)

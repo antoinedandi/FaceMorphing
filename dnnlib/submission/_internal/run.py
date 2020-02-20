@@ -17,7 +17,7 @@ import pickle
 import sys
 
 # PYTHONPATH should have been set so that the run_dir/src is in it
-from utils import dnnlib
+import dnnlib
 
 
 def main():

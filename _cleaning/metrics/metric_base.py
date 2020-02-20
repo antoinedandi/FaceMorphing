@@ -12,8 +12,8 @@ import time
 import hashlib
 import numpy as np
 import tensorflow as tf
-from utils import dnnlib
-import utils.dnnlib.tflib as tflib
+import dnnlib
+import dnnlib.tflib as tflib
 
 from _cleaning import config
 from _cleaning.training import misc

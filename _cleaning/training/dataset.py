@@ -11,7 +11,7 @@ import os
 import glob
 import numpy as np
 import tensorflow as tf
-import utils.dnnlib.tflib as tflib
+import dnnlib.tflib as tflib
 
 #----------------------------------------------------------------------------
 # Parse individual image from a tfrecords file.

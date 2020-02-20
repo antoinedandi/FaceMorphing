@@ -11,7 +11,7 @@ import os
 import pickle
 import numpy as np
 import PIL.Image
-import utils.dnnlib.tflib as tflib
+import dnnlib.tflib as tflib
 from _cleaning import config
 
 #----------------------------------------------------------------------------

@@ -10,7 +10,7 @@ import cv2
 import argparse
 
 from _cleaning import config
-import utils.dnnlib.tflib as tflib
+import dnnlib.tflib as tflib
 
 import keras.backend as K
 

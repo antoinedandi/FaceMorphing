@@ -8,8 +8,8 @@
 """Main entry point for training StyleGAN and ProGAN networks."""
 
 import copy
-from utils import dnnlib
-from utils.dnnlib import EasyDict
+import dnnlib
+from dnnlib import EasyDict
 
 from _cleaning import config
 from _cleaning.metrics import metric_base
