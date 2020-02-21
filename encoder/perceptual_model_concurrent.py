@@ -120,7 +120,7 @@ class PerceptualModelConcurrent:
                                          shape=generated_image.shape,
                                          dtype='float32',
                                          initializer=tf.initializers.zeros())
-        self.ref_weight_2 = tf.get_variable('ref_weight_1',
+        self.ref_weight_1 = tf.get_variable('ref_weight_1',
                                             shape=generated_image.shape,
                                             dtype='float32',
                                             initializer=tf.initializers.zeros())
@@ -143,7 +143,7 @@ class PerceptualModelConcurrent:
         if (self.vgg_loss is not None):
             vgg16 = VGG16(include_top=False, input_shape=(self.img_size, self.img_size, 3))
             self.perceptual_model = Model(vgg16.input, vgg16.layers[self.layer].output)
-            generated_img_features = self.perceptual_model(preprocess_input(self.ref_weight_2 * generated_image))
+            generated_img_features = self.perceptual_model(preprocess_input(self.ref_weight_1 * generated_image))
             # TODO: understand why self.ref_weight_1 above > voir si on peut pas le tej..
 
             # reference images 1
@@ -179,15 +179,15 @@ class PerceptualModelConcurrent:
             self.loss += 0.5 * self.vgg_loss * tf_custom_l1_loss(self.ref_features_weight_2 * self.ref_img_features_2, self.ref_features_weight_2 * generated_img_features)
         # + logcosh loss on image pixels
         if (self.pixel_loss is not None):
-            self.loss += 0.5 * self.pixel_loss * tf_custom_logcosh_loss(self.ref_weight_2 * self.ref_img_1, self.ref_weight_2 * generated_image)
+            self.loss += 0.5 * self.pixel_loss * tf_custom_logcosh_loss(self.ref_weight_1 * self.ref_img_1, self.ref_weight_1 * generated_image)
             self.loss += 0.5 * self.pixel_loss * tf_custom_logcosh_loss(self.ref_weight_2 * self.ref_img_2, self.ref_weight_2 * generated_image)
         # + MS-SIM loss on image pixels
         if (self.mssim_loss is not None):
-            self.loss += 0.5 * self.mssim_loss * tf.math.reduce_mean(1 - tf.image.ssim_multiscale(self.ref_weight_2 * self.ref_img_1, self.ref_weight_2 * generated_image, 1))
+            self.loss += 0.5 * self.mssim_loss * tf.math.reduce_mean(1 - tf.image.ssim_multiscale(self.ref_weight_1 * self.ref_img_1, self.ref_weight_1 * generated_image, 1))
             self.loss += 0.5 * self.mssim_loss * tf.math.reduce_mean(1 - tf.image.ssim_multiscale(self.ref_weight_2 * self.ref_img_2, self.ref_weight_2 * generated_image, 1))
         # + extra perceptual loss on image pixels
         if self.perc_model is not None and self.lpips_loss is not None:
-            self.loss += 0.5 * self.lpips_loss * tf.math.reduce_mean(self.compare_images(self.ref_weight_2 * self.ref_img_1, self.ref_weight_2 * generated_image))
+            self.loss += 0.5 * self.lpips_loss * tf.math.reduce_mean(self.compare_images(self.ref_weight_1 * self.ref_img_1, self.ref_weight_1 * generated_image))
             self.loss += 0.5 * self.lpips_loss * tf.math.reduce_mean(self.compare_images(self.ref_weight_2 * self.ref_img_2, self.ref_weight_2 * generated_image))
         # + L1 penalty on dlatent weights
         if self.l1_penalty is not None:
@@ -236,7 +236,7 @@ class PerceptualModelConcurrent:
             weight_mask_1 = np.ones(self.ref_features_weight_1.shape)
 
         if self.face_mask:
-            image_mask_1 = np.zeros(self.ref_weight_2.shape)
+            image_mask_1 = np.zeros(self.ref_weight_1.shape)
             for (i, im) in enumerate(loaded_image_1):
                 try:
                     _, img_name = os.path.split(images_list_1[i])
@@ -262,7 +262,7 @@ class PerceptualModelConcurrent:
                 image_mask_1[i] = mask
             img = None
         else:
-            image_mask_1 = np.ones(self.ref_weight_2.shape)
+            image_mask_1 = np.ones(self.ref_weight_1.shape)
 
         if len(images_list_1) != self.batch_size:
             if image_features_1 is not None:
@@ -274,7 +274,7 @@ class PerceptualModelConcurrent:
                 weight_mask_1 = np.vstack([existing_examples, empty_examples])
                 image_features_1 = np.vstack([image_features_1, np.zeros(empty_features_shape)])
 
-            images_space = list(self.ref_weight_2.shape[1:])
+            images_space = list(self.ref_weight_1.shape[1:])
             existing_images_space = [len(images_list_1)] + images_space
             empty_images_space = [self.batch_size - len(images_list_1)] + images_space
             existing_images = np.ones(shape=existing_images_space)
