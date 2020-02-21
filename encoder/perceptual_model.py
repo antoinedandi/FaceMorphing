@@ -12,18 +12,18 @@ import traceback
 def load_images(images_list, image_size=256):
     loaded_images = list()
     for img_path in images_list:
-      img = PIL.Image.open(img_path).convert('RGB').resize((image_size,image_size),PIL.Image.LANCZOS)
-      img = np.array(img)
-      img = np.expand_dims(img, 0)
-      loaded_images.append(img)
+        img = PIL.Image.open(img_path).convert('RGB').resize((image_size,image_size),PIL.Image.LANCZOS)
+        img = np.array(img)
+        img = np.expand_dims(img, 0)
+        loaded_images.append(img)
     loaded_images = np.vstack(loaded_images)
     return loaded_images
 
 def tf_custom_l1_loss(img1,img2):
-  return tf.math.reduce_mean(tf.math.abs(img2-img1), axis=None)
+    return tf.math.reduce_mean(tf.math.abs(img2-img1), axis=None)
 
 def tf_custom_logcosh_loss(img1,img2):
-  return tf.math.reduce_mean(tf.keras.losses.logcosh(img1,img2))
+    return tf.math.reduce_mean(tf.keras.losses.logcosh(img1,img2))
 
 def unpack_bz2(src_path):
     data = bz2.BZ2File(src_path).read()
@@ -36,7 +36,7 @@ class PerceptualModel:
     def __init__(self, args, batch_size=1, perc_model=None, sess=None):
         self.sess = tf.get_default_session() if sess is None else sess
         K.set_session(self.sess)
-        self.epsilon = 0.00000001
+        self.epsilon = 1e-7
         self.lr = args.lr
         self.decay_rate = args.decay_rate
         self.decay_steps = args.decay_steps
@@ -105,12 +105,17 @@ class PerceptualModel:
 
         generated_image_tensor = generator.generated_image
         generated_image = tf.image.resize_nearest_neighbor(generated_image_tensor,
-                                                                  (self.img_size, self.img_size), align_corners=True)
+                                                           (self.img_size, self.img_size),
+                                                           align_corners=True)
 
-        self.ref_img = tf.get_variable('ref_img', shape=generated_image.shape,
-                                                dtype='float32', initializer=tf.initializers.zeros())
-        self.ref_weight = tf.get_variable('ref_weight', shape=generated_image.shape,
-                                               dtype='float32', initializer=tf.initializers.zeros())
+        self.ref_img = tf.get_variable('ref_img',
+                                       shape=generated_image.shape,
+                                       dtype='float32',
+                                       initializer=tf.initializers.zeros())
+        self.ref_weight = tf.get_variable('ref_weight',
+                                          shape=generated_image.shape,
+                                          dtype='float32',
+                                          initializer=tf.initializers.zeros())
         self.add_placeholder("ref_img")
         self.add_placeholder("ref_weight")
 
@@ -118,10 +123,14 @@ class PerceptualModel:
             vgg16 = VGG16(include_top=False, input_shape=(self.img_size, self.img_size, 3))
             self.perceptual_model = Model(vgg16.input, vgg16.layers[self.layer].output)
             generated_img_features = self.perceptual_model(preprocess_input(self.ref_weight * generated_image))
-            self.ref_img_features = tf.get_variable('ref_img_features', shape=generated_img_features.shape,
-                                                dtype='float32', initializer=tf.initializers.zeros())
-            self.features_weight = tf.get_variable('features_weight', shape=generated_img_features.shape,
-                                               dtype='float32', initializer=tf.initializers.zeros())
+            self.ref_img_features = tf.get_variable('ref_img_features',
+                                                    shape=generated_img_features.shape,
+                                                    dtype='float32',
+                                                    initializer=tf.initializers.zeros())
+            self.features_weight = tf.get_variable('features_weight',
+                                                   shape=generated_img_features.shape,
+                                                   dtype='float32',
+                                                   initializer=tf.initializers.zeros())
             self.sess.run([self.features_weight.initializer, self.features_weight.initializer])
             self.add_placeholder("ref_img_features")
             self.add_placeholder("features_weight")
@@ -176,6 +185,8 @@ class PerceptualModel:
         assert(len(images_list) != 0 and len(images_list) <= self.batch_size)
         loaded_image = load_images(images_list, self.img_size)
         image_features = None
+
+        # Compute reference images features
         if self.perceptual_model is not None:
             image_features = self.perceptual_model.predict_on_batch(preprocess_input(loaded_image))
             weight_mask = np.ones(self.features_weight.shape)

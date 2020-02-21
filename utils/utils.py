@@ -9,6 +9,12 @@ def split_to_batches(l, n):
         yield l[i:i + n]
 
 
+def split_to_batches_concurrent(l1, l2, n):
+    assert len(l1) == len(l2)
+    for i in range(0, len(l1), n):
+        yield l1[i:i + n], l2[i:i + n]
+
+
 def display_folder_content(folder, res=256):
     if folder[-1] != '/': folder += '/'
     for i, img_path in enumerate(sorted(os.listdir(folder))):
