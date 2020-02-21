@@ -151,26 +151,26 @@ class PerceptualModelConcurrent:
                                                       shape=generated_img_features.shape,
                                                       dtype='float32',
                                                       initializer=tf.initializers.zeros())
-            self.ref_features_weight_1 = tf.get_variable('features_weight_1',
+            self.ref_features_weight_1 = tf.get_variable('ref_features_weight_1',
                                                          shape=generated_img_features.shape,
                                                          dtype='float32',
                                                          initializer=tf.initializers.zeros())
             self.sess.run([self.ref_features_weight_1.initializer, self.ref_features_weight_1.initializer])
             self.add_placeholder("ref_img_features_1")
-            self.add_placeholder("features_weight_1")
+            self.add_placeholder("ref_features_weight_1")
 
             # reference images 2
             self.ref_img_features_2 = tf.get_variable('ref_img_features_2',
                                                       shape=generated_img_features.shape,
                                                       dtype='float32',
                                                       initializer=tf.initializers.zeros())
-            self.ref_features_weight_2 = tf.get_variable('features_weight_2',
+            self.ref_features_weight_2 = tf.get_variable('ref_features_weight_2',
                                                          shape=generated_img_features.shape,
                                                          dtype='float32',
                                                          initializer=tf.initializers.zeros())
             self.sess.run([self.ref_features_weight_2.initializer, self.ref_features_weight_2.initializer])
             self.add_placeholder("ref_img_features_2")
-            self.add_placeholder("features_weight_2")
+            self.add_placeholder("ref_features_weight_2")
 
         self.loss = 0
         # L1 loss on VGG16 features
@@ -283,7 +283,7 @@ class PerceptualModelConcurrent:
             loaded_image_1 = np.vstack([loaded_image_1, np.zeros(empty_images_space)])
 
         if image_features_1 is not None:
-            self.assign_placeholder("features_weight_1", weight_mask_1)
+            self.assign_placeholder("ref_features_weight_1", weight_mask_1)
             self.assign_placeholder("ref_img_features_1", image_features_1)
         self.assign_placeholder("ref_weight_1", image_mask_1)
         self.assign_placeholder("ref_img_1", loaded_image_1)
@@ -295,7 +295,7 @@ class PerceptualModelConcurrent:
         # Compute reference images features
         if self.perceptual_model is not None:
             image_features_2 = self.perceptual_model.predict_on_batch(preprocess_input(loaded_image_2))
-            weight_mask_2 = np.ones(self.ref_features_weight_1.shape)
+            weight_mask_2 = np.ones(self.ref_features_weight_2.shape)
 
         if self.face_mask:
             image_mask_2 = np.zeros(self.ref_weight_2.shape)
@@ -345,7 +345,7 @@ class PerceptualModelConcurrent:
             loaded_image_2 = np.vstack([loaded_image_2, np.zeros(empty_images_space)])
 
         if image_features_2 is not None:
-            self.assign_placeholder("features_weight_2", weight_mask_2)
+            self.assign_placeholder("ref_features_weight_2", weight_mask_2)
             self.assign_placeholder("ref_img_features_2", image_features_2)
         self.assign_placeholder("ref_weight_2", image_mask_2)
         self.assign_placeholder("ref_img_2", loaded_image_2)
