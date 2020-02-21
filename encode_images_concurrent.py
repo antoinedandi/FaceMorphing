@@ -24,6 +24,7 @@ def main():
 
     # Output directories setting
     parser.add_argument('src_dir_1', help='Directory with images for encoding')
+    parser.add_argument('src_dir_2', help='Directory with images for encoding')
     parser.add_argument('generated_images_dir', help='Directory for storing generated images')
     parser.add_argument('guessed_images_dir', help='Directory for storing initially guessed images')
     parser.add_argument('dlatent_dir', help='Directory for storing dlatent representations')
