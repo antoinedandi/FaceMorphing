@@ -71,7 +71,7 @@ class PerceptualModelConcurrent:
             self.perc_model = None
         self.perceptual_model = None
         self.ref_img_1 = None
-        self.ref_weight_2 = None
+        self.ref_weight_1 = None
         self.ref_img_features_1 = None
         self.ref_features_weight_1 = None
         self.ref_img_2 = None
