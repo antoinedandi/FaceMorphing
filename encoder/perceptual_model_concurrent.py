@@ -10,8 +10,6 @@ import keras.backend as K
 import traceback
 
 
-# TODO : une fois que ca tournera, faudra tej tout ce qui est en rapport avec les MASKS
-
 def load_images(images_list, image_size=256):
     loaded_images = list()
     for img_path in images_list:
@@ -143,8 +141,7 @@ class PerceptualModelConcurrent:
         if (self.vgg_loss is not None):
             vgg16 = VGG16(include_top=False, input_shape=(self.img_size, self.img_size, 3))
             self.perceptual_model = Model(vgg16.input, vgg16.layers[self.layer].output)
-            generated_img_features = self.perceptual_model(preprocess_input(self.ref_weight_1 * generated_image))
-            # TODO: understand why self.ref_weight_1 above > voir si on peut pas le tej..
+            generated_img_features = self.perceptual_model(preprocess_input(generated_image))
 
             # reference images 1
             self.ref_img_features_1 = tf.get_variable('ref_img_features_1',
@@ -223,8 +220,6 @@ class PerceptualModelConcurrent:
             return mask
 
     def set_reference_images(self, images_list_1, images_list_2):
-
-        # TODO: simplify that by refactoring ?
 
         assert(len(images_list_1) != 0 and len(images_list_1) <= self.batch_size)
         assert(len(images_list_1) == len(images_list_2))

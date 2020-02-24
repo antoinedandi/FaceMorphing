@@ -7,9 +7,9 @@ import numpy as np
 import gdown
 import dnnlib.tflib as tflib
 from dnnlib.util import open_url
-from utils.utils import split_to_batches
+from utils.utils import split_to_batches_concurrent, create_morphing_lists
 from encoder.generator_model import Generator
-from encoder.perceptual_model import PerceptualModel, load_images
+from encoder.perceptual_model_concurrent import PerceptualModelConcurrent, load_images
 from keras.models import load_model
 from keras.applications.resnet50 import preprocess_input
 
@@ -64,11 +64,12 @@ def main():
 
     args.decay_steps *= 0.01 * args.iterations  # Calculate steps as a percent of total iterations
 
+    # create reference images lists
     ref_images = [os.path.join(args.src_dir, x) for x in os.listdir(args.src_dir)]
     ref_images = sorted(list(filter(os.path.isfile, ref_images)))
-
     if len(ref_images) == 0:
         raise Exception('%s is empty' % args.src_dir)
+    ref_images_1, ref_images_2 = create_morphing_lists(ref_images)
 
     # Create output directories
     os.makedirs('data', exist_ok=True)
@@ -95,7 +96,7 @@ def main():
     if args.use_lpips_loss > 1e-7:
         with open_url(url_VGG_perceptual, cache_dir='cache') as f:
             perc_model = pickle.load(f)
-    perceptual_model = PerceptualModel(args, perc_model=perc_model, batch_size=args.batch_size)
+    perceptual_model = PerceptualModelConcurrent(args, perc_model=perc_model, batch_size=args.batch_size)
     perceptual_model.build_perceptual_model(generator)
 
     # Initialize ResNet model
@@ -107,13 +108,17 @@ def main():
         resnet_model = load_model(resnet_model_fn)
 
     # Optimize (only) dlatents by minimizing perceptual loss between reference and generated images in feature space
-    for images_batch in tqdm(split_to_batches(ref_images, args.batch_size), total=len(ref_images) // args.batch_size):
-        names = [os.path.splitext(os.path.basename(x))[0] for x in images_batch]
-        perceptual_model.set_reference_images(images_batch)
+    for images_batch_1, images_batch_2 in tqdm(split_to_batches_concurrent(ref_images_1, ref_images_2, args.batch_size),
+                                               total=len(ref_images_1) // args.batch_size):
+        names = [os.path.splitext(os.path.basename(i1))[0]+'_vs_'+os.path.splitext(os.path.basename(i2))[0]
+                 for i1, i2 in zip(images_batch_1, images_batch_2)]
+        perceptual_model.set_reference_images(images_batch_1, images_batch_2)
 
         # predict initial dlatents with ResNet model
         if resnet_model is not None:
-            dlatents = resnet_model.predict(preprocess_input(load_images(images_batch, image_size=args.resnet_image_size)))
+            dlatents_1 = resnet_model.predict(preprocess_input(load_images(images_batch_1, image_size=args.resnet_image_size)))
+            dlatents_2 = resnet_model.predict(preprocess_input(load_images(images_batch_2, image_size=args.resnet_image_size)))
+            dlatents = 0.5 * (dlatents_1 + dlatents_2)
             generator.set_dlatents(dlatents)
 
         # Generate and save initially guessed images

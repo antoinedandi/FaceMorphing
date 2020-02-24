@@ -15,7 +15,7 @@ def split_to_batches_concurrent(l1, l2, n):
         yield l1[i:i + n], l2[i:i + n]
 
 
-def create_concurrent_image_lists(l):
+def create_morphing_lists(l):
     l1 = []
     l2 = []
     for i in range(len(l)):
@@ -31,8 +31,7 @@ def generate_faces_from_latent(generator, latent_vector):
                             minibatch_size=1)
     batch_size = latent_vector.shape[0]
     return generator.components.synthesis.run(latent_vector.reshape((batch_size, 18, 512)),
-                                              randomize_noise=False,
-                                              **synthesis_kwargs)
+                                              randomize_noise=False, **synthesis_kwargs)
 
 
 def display_folder_content(folder, res=256):
@@ -145,6 +144,7 @@ def display_results_latent_interpolation(w_vectors, generator, original_imgs, re
                 axes[i + 1, j + 2].axis('off')
 
 
+# TODO : faire une seule fonction comme ca
 def display_results_concurrent_optimization(original_imgs, reconstructed_imgs, res=1024, fs=40):
     
     # Get aligned images and generated images
@@ -153,7 +153,7 @@ def display_results_concurrent_optimization(original_imgs, reconstructed_imgs, r
     
     # Utility function to easily access morphed faces from the folder
     def get_morphed_image(i1, i2):
-        fname = imgs1[i1] + '_vs_' + imgs1[i2]
+        fname = os.path.splitext(os.path.basename(imgs1[i1]))[0] + '_vs_' + os.path.splitext(os.path.basename(imgs1[i2]))[0]
         reconstructed_fnames = [os.path.splitext(os.path.basename(x))[0] for x in imgs2]
         assert fname in reconstructed_fnames
         return imgs2[reconstructed_fnames.index(fname)]

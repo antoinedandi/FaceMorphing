@@ -7,9 +7,9 @@ import numpy as np
 import gdown
 import dnnlib.tflib as tflib
 from dnnlib.util import open_url
-from utils.utils import split_to_batches_concurrent, create_concurrent_image_lists
+from utils.utils import split_to_batches, create_morphing_lists
 from encoder.generator_model import Generator
-from encoder.perceptual_model_concurrent import PerceptualModelConcurrent, load_images
+from encoder.perceptual_model import PerceptualModel, load_images
 from keras.models import load_model
 from keras.applications.resnet50 import preprocess_input
 
@@ -64,12 +64,11 @@ def main():
 
     args.decay_steps *= 0.01 * args.iterations  # Calculate steps as a percent of total iterations
 
-    # create reference images lists
     ref_images = [os.path.join(args.src_dir, x) for x in os.listdir(args.src_dir)]
     ref_images = sorted(list(filter(os.path.isfile, ref_images)))
+
     if len(ref_images) == 0:
         raise Exception('%s is empty' % args.src_dir)
-    ref_images_1, ref_images_2 = create_concurrent_image_lists(ref_images)
 
     # Create output directories
     os.makedirs('data', exist_ok=True)
@@ -96,7 +95,7 @@ def main():
     if args.use_lpips_loss > 1e-7:
         with open_url(url_VGG_perceptual, cache_dir='cache') as f:
             perc_model = pickle.load(f)
-    perceptual_model = PerceptualModelConcurrent(args, perc_model=perc_model, batch_size=args.batch_size)
+    perceptual_model = PerceptualModel(args, perc_model=perc_model, batch_size=args.batch_size)
     perceptual_model.build_perceptual_model(generator)
 
     # Initialize ResNet model
@@ -108,17 +107,14 @@ def main():
         resnet_model = load_model(resnet_model_fn)
 
     # Optimize (only) dlatents by minimizing perceptual loss between reference and generated images in feature space
-    for images_batch_1, images_batch_2 in tqdm(split_to_batches_concurrent(ref_images_1, ref_images_2, args.batch_size),
-                                               total=len(ref_images_1) // args.batch_size):
-        names = [os.path.splitext(os.path.basename(i1))[0]+'_vs_'+os.path.splitext(os.path.basename(i2))[0]
-                 for i1, i2 in zip(images_batch_1, images_batch_2)]
-        perceptual_model.set_reference_images(images_batch_1, images_batch_2)
+    list_dlatents = []
+    for images_batch in tqdm(split_to_batches(ref_images, args.batch_size), total=len(ref_images) // args.batch_size):
+        names = [os.path.splitext(os.path.basename(x))[0] for x in images_batch]
+        perceptual_model.set_reference_images(images_batch)
 
         # predict initial dlatents with ResNet model
         if resnet_model is not None:
-            dlatents_1 = resnet_model.predict(preprocess_input(load_images(images_batch_1, image_size=args.resnet_image_size)))
-            dlatents_2 = resnet_model.predict(preprocess_input(load_images(images_batch_2, image_size=args.resnet_image_size)))
-            dlatents = 0.5 * (dlatents_1 + dlatents_2)
+            dlatents = resnet_model.predict(preprocess_input(load_images(images_batch, image_size=args.resnet_image_size)))
             generator.set_dlatents(dlatents)
 
         # Generate and save initially guessed images
@@ -139,21 +135,26 @@ def main():
                 best_loss = loss_dict["loss"]
                 best_dlatent = generator.get_dlatents()
             generator.stochastic_clip_dlatents()
+        list_dlatents.append(best_dlatent)
         print(" ".join(names), " Loss {:.4f}".format(best_loss))
 
-        # Generate images from found dlatents and save them
-        generator.set_dlatents(best_dlatent)
-        generated_images = generator.generate_images()
-        generated_dlatents = generator.get_dlatents()
-        for img_array, dlatent, img_name in zip(generated_images, generated_dlatents, names):
-            img = PIL.Image.fromarray(img_array, 'RGB')
-            img.save(os.path.join(args.generated_images_dir, f'{img_name}.png'), 'PNG')
-            np.save(os.path.join(args.dlatent_dir, f'{img_name}.npy'), dlatent)
-        generator.reset_dlatents()
+    # Perform face morphing by interpolating the latent space
+    w_vectors = np.concatenate([dlatent for dlatent in list_dlatents], axis=0)
+    w1, w2 = create_morphing_lists(w_vectors)
+    ref_images_1, ref_images_2 = create_morphing_lists(ref_images)
+    for i in range(len(ref_images_1)):
+        avg_w_vector = (0.5 * (w1[i] + w2[i])).reshape((-1, 18, 512))
+        generator.set_dlatents(avg_w_vector)
+        img_array = generator.generate_images()
+        img = PIL.Image.fromarray(img_array, 'RGB')
+        img_name = os.path.splitext(os.path.basename(ref_images_1[i]))[0] + '_vs_' + os.path.splitext(os.path.basename(ref_images_2[i]))[0]
+        img.save(os.path.join(args.generated_images_dir, f'{img_name}.png'), 'PNG')
+        np.save(os.path.join(args.dlatent_dir, f'{img_name}.npy'), avg_w_vector)
+    generator.reset_dlatents()
 
     # Concatenate and save dlalents vectors
     list_dlatents = sorted(os.listdir(args.dlatent_dir))
-    final_w_vectors = np.array([np.load('latent_representations/' + dlatent) for dlatent in list_dlatents])
+    final_w_vectors = np.array([np.load(args.dlatent_dir + dlatent) for dlatent in list_dlatents])
     np.save(os.path.join(args.dlatent_dir, 'output_vectors.npy'), final_w_vectors)
 
 
