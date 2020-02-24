@@ -17,6 +17,7 @@ from keras.applications.resnet50 import preprocess_input
 url_styleGAN = 'https://drive.google.com/uc?export=download&id=1Ru1kpacSvmheTHP7evEGHEegXZjeTaoi'
 url_resnet = 'https://drive.google.com/uc?id=1aT59NFy9-bNyXjDuZOTMl0qX0jmZc6Zb'
 url_VGG_perceptual = 'https://drive.google.com/uc?export=download&id=1poMANPSNDHALZRuaqJGrl1EVOP1WNjLv'
+# TODO : make a new script face_morphing_latent_interpolation and rename concurrent optimization, comme ça on laisse le encode images qui peut être utile
 
 
 def main():
