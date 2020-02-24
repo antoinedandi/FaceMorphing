@@ -153,10 +153,14 @@ def display_results_concurrent_optimization(original_imgs, reconstructed_imgs, r
     
     # Utility function to easily access morphed faces from the folder
     def get_morphed_image(i1, i2):
-        fname = os.path.splitext(os.path.basename(imgs1[i1]))[0] + '_vs_' + os.path.splitext(os.path.basename(imgs1[i2]))[0]
         reconstructed_fnames = [os.path.splitext(os.path.basename(x))[0] for x in imgs2]
-        assert fname in reconstructed_fnames
-        return imgs2[reconstructed_fnames.index(fname)]
+        fname1 = os.path.splitext(os.path.basename(imgs1[i1]))[0] + '_vs_' + os.path.splitext(os.path.basename(imgs1[i2]))[0]
+        fname2 = os.path.splitext(os.path.basename(imgs1[i2]))[0] + '_vs_' + os.path.splitext(os.path.basename(imgs1[i1]))[0]
+        assert (fname1 in reconstructed_fnames) or (fname2 in reconstructed_fnames)
+        if fname1 in reconstructed_fnames:
+            return imgs2[reconstructed_fnames.index(fname1)]
+        else:
+            return imgs2[reconstructed_fnames.index(fname2)]
 
     n_images = len(imgs1)
     n_rows = n_images + 1

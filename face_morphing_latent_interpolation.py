@@ -145,7 +145,7 @@ def main():
     for i in range(len(ref_images_1)):
         avg_w_vector = (0.5 * (w1[i] + w2[i])).reshape((-1, 18, 512))
         generator.set_dlatents(avg_w_vector)
-        img_array = generator.generate_images()
+        img_array = generator.generate_images()[0]
         img = PIL.Image.fromarray(img_array, 'RGB')
         img_name = os.path.splitext(os.path.basename(ref_images_1[i]))[0] + '_vs_' + os.path.splitext(os.path.basename(ref_images_2[i]))[0]
         img.save(os.path.join(args.generated_images_dir, f'{img_name}.png'), 'PNG')
