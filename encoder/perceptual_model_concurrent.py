@@ -223,6 +223,9 @@ class PerceptualModelConcurrent:
             return mask
 
     def set_reference_images(self, images_list_1, images_list_2):
+
+        # TODO: simplify that by refactoring ?
+
         assert(len(images_list_1) != 0 and len(images_list_1) <= self.batch_size)
         assert(len(images_list_1) == len(images_list_2))
 

@@ -65,7 +65,7 @@ def main():
     args.decay_steps *= 0.01 * args.iterations  # Calculate steps as a percent of total iterations
 
     ref_images = [os.path.join(args.src_dir, x) for x in os.listdir(args.src_dir)]
-    ref_images = list(filter(os.path.isfile, ref_images))
+    ref_images = sorted(list(filter(os.path.isfile, ref_images)))
 
     if len(ref_images) == 0:
         raise Exception('%s is empty' % args.src_dir)
@@ -78,7 +78,7 @@ def main():
     if args.face_mask:
         os.makedirs(args.mask_dir, exist_ok=True)
 
-    # Initialize generator and perceptual model
+    # Initialize generator
     tflib.init_tf()
     with open_url(url_styleGAN, cache_dir='cache') as f:
         generator_network, discriminator_network, Gs_network = pickle.load(f)
@@ -90,12 +90,21 @@ def main():
                           model_res=args.model_res,
                           randomize_noise=args.randomize_noise)
 
+    # Initialize perceptual model
     perc_model = None
-    if (args.use_lpips_loss > 1e-7):
+    if args.use_lpips_loss > 1e-7:
         with open_url(url_VGG_perceptual, cache_dir='cache') as f:
             perc_model = pickle.load(f)
     perceptual_model = PerceptualModel(args, perc_model=perc_model, batch_size=args.batch_size)
     perceptual_model.build_perceptual_model(generator)
+
+    # Initialize ResNet model
+    resnet_model = None
+    if args.use_resnet:
+        print("\nLoading ResNet Model:")
+        resnet_model_fn = 'data/finetuned_resnet.h5'
+        gdown.download(url_resnet, resnet_model_fn, quiet=True)
+        resnet_model = load_model(resnet_model_fn)
 
     # Optimize (only) dlatents by minimizing perceptual loss between reference and generated images in feature space
     for images_batch in tqdm(split_to_batches(ref_images, args.batch_size), total=len(ref_images) // args.batch_size):
@@ -103,11 +112,7 @@ def main():
         perceptual_model.set_reference_images(images_batch)
 
         # predict initial dlatents with ResNet model
-        if (args.use_resnet):
-            print("\nLoading ResNet Model:")
-            resnet_model_fn = 'data/finetuned_resnet.h5'
-            gdown.download(url_resnet, resnet_model_fn, quiet=True)
-            resnet_model = load_model(resnet_model_fn)
+        if resnet_model is not None:
             dlatents = resnet_model.predict(preprocess_input(load_images(images_batch, image_size=args.resnet_image_size)))
             generator.set_dlatents(dlatents)
 
