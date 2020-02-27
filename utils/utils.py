@@ -184,7 +184,7 @@ def display_results_face_recognition(original_imgs, generated_imgs, tolerance=0.
         img_2_encoding = face_recognizer.get_encoding(generated_imgs + img_2)[0]
         face_reco = face_recognizer.compare_faces(img_1_encoding, [img_2_encoding])
         res, score = (face_reco[0][0], str(round(face_reco[1][0], 2)))
-        display_img = Image.open(generated_imgs + img_2).resize((100, 100)).convert("L")
+        display_img = Image.open(generated_imgs + img_2).convert("L")
         display_img = np.asarray(display_img)
         return display_img, res, score
 
@@ -199,15 +199,25 @@ def display_results_face_recognition(original_imgs, generated_imgs, tolerance=0.
 
     # Left Columns
     for i in range(n_images):
+
+        # Column 0
         img1 = Image.open(original_imgs + imgs1[i]).resize((res, res))
-        img2 = Image.open(generated_imgs + get_morphed_image(i, i)).resize((res, res))
         axes[i + 1, 0].imshow(img1)
         axes[i + 1, 0].axis('off')
-        axes[i + 1, 1].imshow(img2)
+
+        # Column 1
+        img2, res, score = get_facial_reco(i, i)
+        if res:
+            axes[i + 1, 1].imshow(img2, cmap='Greens_r')
+        else:
+            axes[i + 1, 1].imshow(img2, cmap='Reds_r')
+        axes[i + 1, 1].annotate(score, size=20, bbox=dict(boxstyle="round", fc="cyan", ),
+                                    xy=(3, 1), xycoords='data', xytext=(0.1, 0.1), textcoords='axes fraction')
         axes[i + 1, 1].axis('off')
+
         if i == 0:
-            axes[i, 0].set_title('Original')
-            axes[i, 1].set_title('Reconstructed')
+            axes[i, 0].set_title('Original', fontsize=30)
+            axes[i, 1].set_title('Reconstructed', fontsize=30)
 
     # Top Row
     for j in range(n_images):
