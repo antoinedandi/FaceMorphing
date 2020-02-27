@@ -183,10 +183,10 @@ def display_results_face_recognition(original_imgs, generated_imgs, tolerance=0.
         img_1_encoding = face_recognizer.get_encoding(original_imgs + img_1)[0]
         img_2_encoding = face_recognizer.get_encoding(generated_imgs + img_2)[0]
         face_reco = face_recognizer.compare_faces(img_1_encoding, [img_2_encoding])
-        res, score = (face_reco[0][0], str(round(face_reco[1][0], 2)))
+        result, score = (face_reco[0][0], str(round(face_reco[1][0], 2)))
         display_img = Image.open(generated_imgs + img_2).resize((res, res)).convert("L")
         display_img = np.asarray(display_img)
-        return display_img, res, score
+        return display_img, result, score
 
     n_images = len(imgs1)
     n_rows = n_images + 1
