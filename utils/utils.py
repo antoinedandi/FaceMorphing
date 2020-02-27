@@ -180,8 +180,8 @@ def display_results_face_recognition(original_imgs, generated_imgs, tolerance=0.
     def get_facial_reco(i1, i2):
         img_1 = imgs1[i1]
         img_2 = get_morphed_image(i1, i2)
-        img_1_encoding = face_recognizer.get_encoding(original_imgs + img_1)
-        img_2_encoding = face_recognizer.get_encoding(generated_imgs + img_2)
+        img_1_encoding = face_recognizer.get_encoding(original_imgs + img_1)[0]
+        img_2_encoding = face_recognizer.get_encoding(generated_imgs + img_2)[0]
         face_reco = face_recognizer.compare_faces(img_1_encoding, img_2_encoding)
         res, score = (face_reco[0][0], str(round(face_reco[1][0], 2)))
         display_img = Image.open(generated_imgs + img_2).resize((100, 100)).convert("L")
