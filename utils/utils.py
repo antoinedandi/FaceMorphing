@@ -136,8 +136,8 @@ def display_results_face_morphing(original_imgs, generated_imgs, res=1024, fs=40
         axes[i + 1, 1].imshow(img2)
         axes[i + 1, 1].axis('off')
         if i == 0:
-            axes[i, 0].set_title('Original')
-            axes[i, 1].set_title('Reconstructed')
+            axes[i, 0].set_title('Original', fontsize=15)
+            axes[i, 1].set_title('Reconstructed', fontsize=15)
 
     # Top Row
     for j in range(n_images):
@@ -216,8 +216,8 @@ def display_results_face_recognition(original_imgs, generated_imgs, tolerance=0.
         axes[i + 1, 1].axis('off')
 
         if i == 0:
-            axes[i, 0].set_title('Original', fontsize=30)
-            axes[i, 1].set_title('Reconstructed', fontsize=30)
+            axes[i, 0].set_title('Original', fontsize=15)
+            axes[i, 1].set_title('Reconstructed', fontsize=15)
 
     # Top Row
     for j in range(n_images):
