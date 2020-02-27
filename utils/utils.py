@@ -184,7 +184,7 @@ def display_results_face_recognition(original_imgs, generated_imgs, tolerance=0.
         img_2_encoding = face_recognizer.get_encoding(generated_imgs + img_2)[0]
         face_reco = face_recognizer.compare_faces(img_1_encoding, [img_2_encoding])
         res, score = (face_reco[0][0], str(round(face_reco[1][0], 2)))
-        display_img = Image.open(generated_imgs + img_2).convert("L")
+        display_img = Image.open(generated_imgs + img_2).resize((res, res)).convert("L")
         display_img = np.asarray(display_img)
         return display_img, res, score
 
@@ -206,8 +206,8 @@ def display_results_face_recognition(original_imgs, generated_imgs, tolerance=0.
         axes[i + 1, 0].axis('off')
 
         # Column 1
-        img2, res, score = get_facial_reco(i, i)
-        if res:
+        img2, result, score = get_facial_reco(i, i)
+        if result:
             axes[i + 1, 1].imshow(img2, cmap='Greens_r')
         else:
             axes[i + 1, 1].imshow(img2, cmap='Reds_r')
@@ -231,8 +231,8 @@ def display_results_face_recognition(original_imgs, generated_imgs, tolerance=0.
             if i == j:
                 axes[i + 1, j + 2].axis('off')
             else:
-                img, res, score = get_facial_reco(i, j)
-                if res:
+                img, result, score = get_facial_reco(i, j)
+                if result:
                     axes[i + 1, j + 2].imshow(img, cmap='Greens_r')
                 else:
                     axes[i + 1, j + 2].imshow(img, cmap='Reds_r')
