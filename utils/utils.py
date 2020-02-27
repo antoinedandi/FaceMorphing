@@ -1,7 +1,18 @@
 import os
+import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
+import bz2
 import dnnlib.tflib as tflib
+from utils.face_utilities.face_recognition import FaceRecognizer
+
+
+def unpack_bz2(src_path):
+    data = bz2.BZ2File(src_path).read()
+    dst_path = src_path[:-4]
+    with open(dst_path, 'wb') as fp:
+        fp.write(data)
+    return dst_path
 
 
 def split_to_batches(l, n):
@@ -99,11 +110,11 @@ def display_morphing_results(original_imgs, guessed_imgs, reconstructed_imgs, re
         print("")
 
 
-def display_results_face_morphing(original_imgs, reconstructed_imgs, res=1024, fs=40):
+def display_results_face_morphing(original_imgs, generated_imgs, res=1024, fs=40):
     
     # Get aligned images and generated images
     imgs1 = sorted([f for f in os.listdir(original_imgs) if '.png' in f])
-    imgs2 = sorted([f for f in os.listdir(reconstructed_imgs) if '.png' in f])
+    imgs2 = sorted([f for f in os.listdir(generated_imgs) if '.png' in f])
     
     # Utility function to easily access morphed faces from the folder
     def get_morphed_image(i1, i2):
@@ -128,7 +139,7 @@ def display_results_face_morphing(original_imgs, reconstructed_imgs, res=1024, f
     # Left Columns
     for i in range(n_images):
         img1 = Image.open(original_imgs + imgs1[i]).resize((res, res))
-        img2 = Image.open(reconstructed_imgs + get_morphed_image(i, i)).resize((res, res))
+        img2 = Image.open(generated_imgs + get_morphed_image(i, i)).resize((res, res))
         axes[i + 1, 0].imshow(img1)
         axes[i + 1, 0].axis('off')
         axes[i + 1, 1].imshow(img2)
@@ -139,7 +150,7 @@ def display_results_face_morphing(original_imgs, reconstructed_imgs, res=1024, f
 
     # Top Row
     for j in range(n_images):
-        img = Image.open(reconstructed_imgs + get_morphed_image(j, j)).resize((res, res))
+        img = Image.open(generated_imgs + get_morphed_image(j, j)).resize((res, res))
         axes[0, j + 2].imshow(img)
         axes[0, j + 2].axis('off')
 
@@ -149,6 +160,81 @@ def display_results_face_morphing(original_imgs, reconstructed_imgs, res=1024, f
             if i == j:
                 axes[i + 1, j + 2].axis('off')
             else:
-                img = Image.open(reconstructed_imgs + get_morphed_image(i, j)).resize((res, res))
+                img = Image.open(generated_imgs + get_morphed_image(i, j)).resize((res, res))
                 axes[i + 1, j + 2].imshow(img)
+                axes[i + 1, j + 2].axis('off')
+
+
+def display_results_face_recognition(original_imgs, generated_imgs, tolerance=0.6, res=1024, fs=40):
+
+    # Init face recognizer model
+    face_recognizer = FaceRecognizer(tolerance)
+
+    # Get aligned images and generated images
+    imgs1 = sorted([f for f in os.listdir(original_imgs) if '.png' in f])
+    imgs2 = sorted([f for f in os.listdir(generated_imgs) if '.png' in f])
+
+    # Utility function to easily access morphed faces from the folder
+    def get_morphed_image(i1, i2):
+        reconstructed_fnames = [os.path.splitext(os.path.basename(x))[0] for x in imgs2]
+        fname1 = os.path.splitext(os.path.basename(imgs1[i1]))[0] + '_vs_' + os.path.splitext(os.path.basename(imgs1[i2]))[0]
+        fname2 = os.path.splitext(os.path.basename(imgs1[i2]))[0] + '_vs_' + os.path.splitext(os.path.basename(imgs1[i1]))[0]
+        assert (fname1 in reconstructed_fnames) or (fname2 in reconstructed_fnames)
+        if fname1 in reconstructed_fnames:
+            return imgs2[reconstructed_fnames.index(fname1)]
+        else:
+            return imgs2[reconstructed_fnames.index(fname2)]
+
+    # Utility function to perform face recognition on two images identified by their index
+    def get_facial_reco(i1, i2):
+        img_1 = imgs1[i1]
+        img_2 = get_morphed_image(i1, i2)
+        img_1_encoding = face_recognizer.get_encoding(original_imgs + img_1)
+        img_2_encoding = face_recognizer.get_encoding(generated_imgs + img_2)
+        face_reco = face_recognizer.compare_faces(img_1_encoding, img_2_encoding)
+        res, score = (face_reco[0][0], str(round(face_reco[1][0], 2)))
+        display_img = Image.open(generated_imgs + img_2).resize((100, 100)).convert("L")
+        display_img = np.asarray(display_img)
+        return display_img, res, score
+
+    n_images = len(imgs1)
+    n_rows = n_images + 1
+    n_cols = n_images + 2
+
+    f, axes = plt.subplots(n_rows, n_cols, figsize=(fs, fs))
+    plt.subplots_adjust(wspace=0, hspace=0)
+    axes[0, 0].axis('off')
+    axes[0, 1].axis('off')
+
+    # Left Columns
+    for i in range(n_images):
+        img1 = Image.open(original_imgs + imgs1[i]).resize((res, res))
+        img2 = Image.open(generated_imgs + get_morphed_image(i, i)).resize((res, res))
+        axes[i + 1, 0].imshow(img1)
+        axes[i + 1, 0].axis('off')
+        axes[i + 1, 1].imshow(img2)
+        axes[i + 1, 1].axis('off')
+        if i == 0:
+            axes[i, 0].set_title('Original')
+            axes[i, 1].set_title('Reconstructed')
+
+    # Top Row
+    for j in range(n_images):
+        img = Image.open(original_imgs + imgs1[j]).resize((res, res))
+        axes[0, j + 2].imshow(img)
+        axes[0, j + 2].axis('off')
+
+    # Morphed Faces
+    for i in range(n_images):
+        for j in range(n_images):
+            if i == j:
+                axes[i + 1, j + 2].axis('off')
+            else:
+                img, res, score = get_facial_reco(i, j)
+                if res:
+                    axes[i + 1, j + 2].imshow(img, cmap='Greens_r')
+                else:
+                    axes[i + 1, j + 2].imshow(img, cmap='Reds_r')
+                axes[i + 1, j + 2].annotate(score, size=20, bbox=dict(boxstyle="round", fc="cyan", ),
+                                            xy=(3, 1), xycoords='data', xytext=(0.1, 0.1), textcoords='axes fraction')
                 axes[i + 1, j + 2].axis('off')

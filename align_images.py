@@ -1,19 +1,11 @@
 import os
-import bz2
 import argparse
+from utils.utils import unpack_bz2
 from keras.utils import get_file
 from utils.face_utilities.face_alignment import image_align
 from utils.face_utilities.landmarks_detector import LandmarksDetector
 
 LANDMARKS_MODEL_URL = 'http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2'
-
-
-def unpack_bz2(src_path):
-    data = bz2.BZ2File(src_path).read()
-    dst_path = src_path[:-4]
-    with open(dst_path, 'wb') as fp:
-        fp.write(data)
-    return dst_path
 
 
 if __name__ == "__main__":
