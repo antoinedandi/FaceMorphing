@@ -1,10 +1,18 @@
-import dlib
 import numpy as np
+import bz2
+import dlib
 from keras.utils import get_file
-from utils.utils import unpack_bz2
 
 LANDMARKS_MODEL_URL   = 'http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2'
 RECOGNITION_MODEL_URL = 'http://dlib.net/files/dlib_face_recognition_resnet_model_v1.dat.bz2'
+
+
+def unpack_bz2(src_path):
+    data = bz2.BZ2File(src_path).read()
+    dst_path = src_path[:-4]
+    with open(dst_path, 'wb') as fp:
+        fp.write(data)
+    return dst_path
 
 
 class FaceRecognizer:

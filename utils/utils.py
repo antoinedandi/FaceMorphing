@@ -2,17 +2,8 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-import bz2
 import dnnlib.tflib as tflib
 from utils.face_utilities.face_recognition import FaceRecognizer
-
-
-def unpack_bz2(src_path):
-    data = bz2.BZ2File(src_path).read()
-    dst_path = src_path[:-4]
-    with open(dst_path, 'wb') as fp:
-        fp.write(data)
-    return dst_path
 
 
 def split_to_batches(l, n):
