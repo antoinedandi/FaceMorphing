@@ -107,7 +107,6 @@ def main():
         resnet_model = load_model(resnet_model_fn)
 
     # Optimize (only) dlatents by minimizing perceptual loss between reference and generated images in feature space
-    list_dlatents = []
     for images_batch in tqdm(split_to_batches(ref_images, args.batch_size), total=len(ref_images) // args.batch_size):
         names = [os.path.splitext(os.path.basename(x))[0] for x in images_batch]
         perceptual_model.set_reference_images(images_batch)
@@ -135,12 +134,22 @@ def main():
                 best_loss = loss_dict["loss"]
                 best_dlatent = generator.get_dlatents()
             generator.stochastic_clip_dlatents()
-        list_dlatents.append(best_dlatent)
         print(" ".join(names), " Loss {:.4f}".format(best_loss))
 
+        # Save found dlatents
+        generator.set_dlatents(best_dlatent)
+        generated_dlatents = generator.get_dlatents()
+        for dlatent, img_name in zip(generated_dlatents, names):
+            np.save(os.path.join(args.dlatent_dir, f'{img_name}.npy'), dlatent)
+        generator.reset_dlatents()
+
+    # Concatenate and save dlalents vectors
+    list_dlatents = sorted(os.listdir(args.dlatent_dir))
+    final_w_vectors = np.array([np.load(args.dlatent_dir + dlatent) for dlatent in list_dlatents])
+    np.save(os.path.join(args.dlatent_dir, 'output_vectors.npy'), final_w_vectors)
+
     # Perform face morphing by interpolating the latent space
-    w_vectors = np.concatenate([dlatent for dlatent in list_dlatents], axis=0)
-    w1, w2 = create_morphing_lists(w_vectors)
+    w1, w2 = create_morphing_lists(final_w_vectors)
     ref_images_1, ref_images_2 = create_morphing_lists(ref_images)
     for i in range(len(ref_images_1)):
         avg_w_vector = (0.5 * (w1[i] + w2[i])).reshape((-1, 18, 512))
@@ -149,13 +158,7 @@ def main():
         img = PIL.Image.fromarray(img_array, 'RGB')
         img_name = os.path.splitext(os.path.basename(ref_images_1[i]))[0] + '_vs_' + os.path.splitext(os.path.basename(ref_images_2[i]))[0]
         img.save(os.path.join(args.generated_images_dir, f'{img_name}.png'), 'PNG')
-        np.save(os.path.join(args.dlatent_dir, f'{img_name}.npy'), avg_w_vector)
     generator.reset_dlatents()
-
-    # Concatenate and save dlalents vectors
-    list_dlatents = sorted(os.listdir(args.dlatent_dir))
-    final_w_vectors = np.array([np.load(args.dlatent_dir + dlatent) for dlatent in list_dlatents])
-    np.save(os.path.join(args.dlatent_dir, 'output_vectors.npy'), final_w_vectors)
 
 
 if __name__ == "__main__":
