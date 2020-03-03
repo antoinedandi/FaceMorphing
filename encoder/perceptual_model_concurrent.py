@@ -35,8 +35,9 @@ def unpack_bz2(src_path):
 
 
 # TODO : to test for better results:
-# - 1) masking
+# - 1) masking -> check masking names
 # - 2) masking + increase l1 penalty
+# - 3) masking only one image
 
 
 class PerceptualModelConcurrent:
@@ -296,11 +297,14 @@ class PerceptualModelConcurrent:
 
         loaded_image_2 = load_images(images_list_2, self.img_size)
         image_features_2 = None
+        image_mask_2 = np.ones(self.ref_weight_2.shape)  # TODO: (moved here)
         # Compute reference images features
         if self.perceptual_model is not None:
             image_features_2 = self.perceptual_model.predict_on_batch(preprocess_input(loaded_image_2))
             weight_mask_2 = np.ones(self.ref_features_weight_2.shape)
 
+        # TODO : try that : no mask on second img
+        """
         if self.face_mask:
             image_mask_2 = np.zeros(self.ref_weight_2.shape)
             for (i, im) in enumerate(loaded_image_2):
@@ -329,6 +333,7 @@ class PerceptualModelConcurrent:
             img = None
         else:
             image_mask_2 = np.ones(self.ref_weight_2.shape)
+        """
 
         if len(images_list_2) != self.batch_size:
             if image_features_2 is not None:
