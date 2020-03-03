@@ -33,6 +33,12 @@ def unpack_bz2(src_path):
         fp.write(data)
     return dst_path
 
+
+# TODO : to test for better results:
+# - 1) masking
+# - 2) masking + increase l1 penalty
+
+
 class PerceptualModelConcurrent:
     def __init__(self, args, batch_size=1, perc_model=None, sess=None):
         self.sess = tf.get_default_session() if sess is None else sess
@@ -250,7 +256,7 @@ class PerceptualModelConcurrent:
                         imask = PIL.Image.fromarray(imask, 'L')
                         print("Saving mask " + mask_img_1)
                         imask.save(mask_img_1, 'PNG')
-                        mask = np.expand_dims(mask,axis=-1)
+                        mask = np.expand_dims(mask, axis=-1)
                     mask = np.ones(im.shape,np.float32) * mask
                 except Exception as e:
                     print("Exception in mask handling for " + mask_img_1)
