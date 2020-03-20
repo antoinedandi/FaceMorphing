@@ -34,12 +34,6 @@ def unpack_bz2(src_path):
     return dst_path
 
 
-# TODO : to test for better results:
-# - 1) masking -> check masking names
-# - 2) masking + increase l1 penalty
-# - 3) masking only one image
-
-
 class PerceptualModelConcurrent:
     def __init__(self, args, batch_size=1, perc_model=None, sess=None):
         self.sess = tf.get_default_session() if sess is None else sess
@@ -195,7 +189,7 @@ class PerceptualModelConcurrent:
             self.loss += 0.5 * self.lpips_loss * tf.math.reduce_mean(self.compare_images(self.ref_weight_2 * self.ref_img_2, self.ref_weight_2 * generated_image))
         # + L1 penalty on dlatent weights
         if self.l1_penalty is not None:
-            self.loss += 0.5 * self.l1_penalty * 512 * tf.math.reduce_mean(tf.math.abs(generator.dlatent_variable - generator.get_dlatent_avg()))
+            self.loss += self.l1_penalty * 512 * tf.math.reduce_mean(tf.math.abs(generator.dlatent_variable - generator.get_dlatent_avg()))
 
     def generate_face_mask(self, im):
         from imutils import face_utils
@@ -293,17 +287,16 @@ class PerceptualModelConcurrent:
         self.assign_placeholder("ref_weight_1", image_mask_1)
         self.assign_placeholder("ref_img_1", loaded_image_1)
 
-        # set reference images 2
+        # set reference images 2 without masking it to keep one reference background
 
         loaded_image_2 = load_images(images_list_2, self.img_size)
         image_features_2 = None
-        image_mask_2 = np.ones(self.ref_weight_2.shape)  # TODO: (moved here)
+        image_mask_2 = np.ones(self.ref_weight_2.shape)
         # Compute reference images features
         if self.perceptual_model is not None:
             image_features_2 = self.perceptual_model.predict_on_batch(preprocess_input(loaded_image_2))
             weight_mask_2 = np.ones(self.ref_features_weight_2.shape)
 
-        # TODO : try that : no mask on second img
         """
         if self.face_mask:
             image_mask_2 = np.zeros(self.ref_weight_2.shape)
