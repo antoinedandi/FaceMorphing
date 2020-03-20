@@ -11,16 +11,16 @@ Left columns: original and reconstructed images. Other images in rows and column
 
 ## Usage
 Usage: The simplest way to get started and to perform face morphing is to run this [colab notebook](https://colab.research.google.com/drive/1NJkGIgRTbeJ2754fuDNhf-RtUjV6nzkv) which uses the scripts in this repo.
-You can also find this notebook [here](https://github.com/antoinedandi/FaceMorphing).
+You can also find this notebook [here](https://github.com/antoinedandi/FaceMorphing/blob/master/notebooks/FaceMorphing.ipynb).
 
 
 ## Face morphing approaches
 
 #### Face morphing by encoding and interpolating the latent space of a pretrained StyleGAN
-![Face morphing by latent space interpolation](figures/face_morphing_latent_interpolation.png)
+![Face morphing by latent space interpolation](figures/latent_interpolation.png)
 
 #### Face morphing by concurrent optimization in the latent space of a pretrained StyleGAN
-![Face morphing by concurrent optimization in latent space](figures/face_morphing_concurrent_optimization.png)
+![Face morphing by concurrent optimization in latent space](figures/concurrent_optimization.png)
 
 ## Folder Structure
 
