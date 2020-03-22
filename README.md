@@ -77,4 +77,4 @@ Pretrained models used by our face morphing scripts are available via the follow
 
 ## Acknowledgements
 
-Thanks to @Puzer for the original styleGAN encoder, of which this is a fork, to @SimJeg for the initial code that formed the basis of the ResNet model used here and to @pbaylies for his fork as well!
+Thanks to @Puzer and @pbaylies for the original styleGAN encoder, of which this is a fork and to @SimJeg for the initial code that formed the basis of the ResNet model used here!
