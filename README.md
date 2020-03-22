@@ -17,9 +17,11 @@ You can also find this notebook [here](https://github.com/antoinedandi/FaceMorph
 ## Face morphing approaches
 
 #### Face morphing by encoding and interpolating the latent space of a pretrained StyleGAN
+![Algo:1 Face morphing by latent space interpolation](figures/latent_space_embedding_algo.png)
 ![Face morphing by latent space interpolation](figures/latent_interpolation.png)
 
 #### Face morphing by concurrent optimization in the latent space of a pretrained StyleGAN
+![Algo:2 Face morphing by concurrent optimization in latent space](figures/concurrent_latent_space_embedding_algo.png)
 ![Face morphing by concurrent optimization in latent space](figures/concurrent_optimization.png)
 
 ## Folder Structure
